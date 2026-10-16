@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 //import ProveedoresModel from '../models/proveedoresModels.js'
 import { prisma } from "../config/prisma.js";
-import { ProveedoresCondicionIva } from '@prisma/client';
+//import { ProveedoresCondicionIva } from '@prisma/client';
 class ProveedoresController {
     constructor () { }
 
@@ -27,7 +27,7 @@ class ProveedoresController {
             const { condicion } = req.params;
 
             // Reemplazamos guiones por guiones bajos y forzamos el tipo del Enum
-            const condicionFormateada = String(condicion).replace('-', '_') as ProveedoresCondicionIva;
+            const condicionFormateada = String(condicion).replace('-', '_') as any;
 
             const proveedores = await prisma.proveedores.findMany({
                 where: {
@@ -97,7 +97,7 @@ class ProveedoresController {
                     email,
                     direccion,
                     id_ciudad: Number(id_ciudad), // Conversión a número obligatoria
-                    condicion_iva: condicion_iva as ProveedoresCondicionIva // Casteamos al Enum del Schema
+                    condicion_iva: condicion_iva as any
                 }
             });
 
@@ -154,7 +154,7 @@ class ProveedoresController {
                     email,
                     direccion,
                     id_ciudad: Number(id_ciudad),
-                    condicion_iva: condicion_iva as ProveedoresCondicionIva
+                    condicion_iva: condicion_iva as any
                 }
             });
 
@@ -179,7 +179,7 @@ class ProveedoresController {
 
             // Normalizamos tipos numéricos y enums si vienen en los campos parciales
             if (campos.id_ciudad !== undefined) campos.id_ciudad = Number(campos.id_ciudad);
-            if (campos.condicion_iva !== undefined) campos.condicion_iva = campos.condicion_iva as ProveedoresCondicionIva;
+            if (campos.condicion_iva !== undefined) campos.condicion_iva = campos.condicion_iva as any;
          
             const proveedorActualizado = await prisma.proveedores.update({
                 where: {

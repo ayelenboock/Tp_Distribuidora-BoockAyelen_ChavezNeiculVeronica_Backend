@@ -1,7 +1,8 @@
 import type { Request, Response } from 'express';
 //import ClientesModel from '../models/clientesModels.js'
 import {prisma} from "../config/prisma.js";
-import { ClientesCondicionIva } from '@prisma/client';
+//import type { ClientesCondicionIva } from '../generated/prisma/enums.js';
+
 
 class ClientesController {
     constructor (){}
@@ -29,7 +30,7 @@ async consultarPorCondicion(req: Request, res: Response) {
         const { condicion } = req.params;
 
         // Normalizamos el parámetro reemplazando guiones y forzando el tipo del Enum
-        const condicionFormateada = String(condicion).replace('-', '_') as ClientesCondicionIva;
+        const condicionFormateada = String(condicion).replace('-', '_') as any;
 
         // Consultamos a Prisma filtrando por la condición de IVA
         const clientes = await prisma.clientes.findMany({
@@ -116,7 +117,7 @@ async consultarPorCondicion(req: Request, res: Response) {
                 telefono: telefono,
                 email: email,
                 dni: dni,
-                condicion_iva: condicion_iva as ClientesCondicionIva // Casteamos al tipo Enum de Prisma
+                condicion_iva: condicion_iva as any
             }
         });
 
@@ -179,7 +180,7 @@ async consultarPorCondicion(req: Request, res: Response) {
                       telefono:telefono,
                        email:email,
                        dni: dni,
-                condicion_iva: condicion_iva as ClientesCondicionIva // Casteamos al tipo Enum
+                condicion_iva: condicion_iva as any
             }
         });
 

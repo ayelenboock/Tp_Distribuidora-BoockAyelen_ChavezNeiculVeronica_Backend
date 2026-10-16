@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 //import PedidosModel from '../models/pedidosModels.js';
 import { prisma } from "../config/prisma.js";
-import { PedidosEstado } from '@prisma/client';
+
 class PedidosController {
     constructor (){}
     
@@ -34,7 +34,7 @@ class PedidosController {
                     id_empleado: Number(id_empleado),
                     id_compania: Number(id_compania),
                     total: total,
-                    estado: estado ? (estado as PedidosEstado) : undefined // Casteo opcional del Enum
+                    estado: estado ? (estado as any) : undefined // Casteo opcional del Enum
                 }
             });
 
@@ -55,7 +55,7 @@ class PedidosController {
 
             const pedidos = await prisma.pedidos.findMany({
                 where: {
-                    estado: estado as PedidosEstado // Casteamos el string al tipo Enum del Schema
+                    estado: estado as any
                 }
             });
 
@@ -140,7 +140,7 @@ class PedidosController {
                     id_empleado: Number(id_empleado),
                     id_compania: Number(id_compania),
                     total: total,
-                    estado: estado as PedidosEstado
+                    estado: estado as any
                 }
             });
 
