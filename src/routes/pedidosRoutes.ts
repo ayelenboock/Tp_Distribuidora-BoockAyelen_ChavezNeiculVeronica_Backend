@@ -1,0 +1,31 @@
+import express from "express";
+import pedidosControllers from "../controllers/pedidosControllers.js";
+
+
+const router = express.Router();
+
+//Métodos GET
+router.get('/', pedidosControllers.consultar)
+//Método POST
+router.post('/', pedidosControllers.ingresar)
+
+//Métodos GET por estado
+router.get('/estado/:estado', pedidosControllers.consultarPorEstado)
+
+//Métodos GET estadisticas
+router.get('/estadisticas', pedidosControllers.estadisticas)
+
+//Métodos con /:id 
+router.route('/:id')
+ .put(pedidosControllers.actualizar)  //Método  PUT
+
+//Método Get id
+ .get(pedidosControllers.consultarDetalle)
+
+//Método PATCH
+ .patch(pedidosControllers.actualizarParcial )
+
+//Método DELETE
+ .delete(pedidosControllers.eliminar)
+
+export default router;

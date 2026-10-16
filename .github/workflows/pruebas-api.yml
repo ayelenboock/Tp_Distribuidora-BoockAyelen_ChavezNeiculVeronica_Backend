@@ -1,0 +1,101 @@
+# Ejecuta la colección de Postman contra la API en cada push.
+# Levanta MariaDB 10.4 (la misma versión que XAMPP), importa database.sql,
+# arranca la API y corre casos_de_prueba.postman_collection.json con Newman.
+# Si algún caso no devuelve el código esperado, el workflow falla.
+
+name: Pruebas de la API
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  pruebas-api:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      mariadb:
+        image: mariadb:10.4
+        env:
+          # Root sin contraseña, igual que en XAMPP y en src/database/conexion.mjs
+          MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 --silent"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    env:
+      SQL_FILE: database.sql
+      COLECCION: casos_de_prueba.postman_collection.json
+      PORT: 3000
+
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Verificar que existan el script SQL y la colección
+        run: |
+          for archivo in "$SQL_FILE" "$COLECCION"; do
+            if [ ! -f "$archivo" ]; then
+              echo "::error::No se encontró $archivo en la raíz del repositorio."
+              exit 1
+            fi
+          done
+
+      - name: Configurar el modo SQL igual que XAMPP
+        # XAMPP no usa modo estricto; sin esto, MariaDB se comporta distinto que en local
+        run: >-
+          docker exec ${{ job.services.mariadb.id }}
+          mysql -uroot -e "SET GLOBAL sql_mode = 'NO_ZERO_IN_DATE,NO_ZERO_DATE,NO_ENGINE_SUBSTITUTION';"
+
+      - name: Crear la base e importar los datos
+        run: |
+          docker exec ${{ job.services.mariadb.id }} mysql -uroot \
+            -e "CREATE DATABASE IF NOT EXISTS distribuidora CHARACTER SET utf8 COLLATE utf8_spanish_ci;"
+          docker exec -i ${{ job.services.mariadb.id }} mysql -uroot \
+            --default-character-set=utf8mb4 distribuidora < "$SQL_FILE"
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Levantar la API
+        run: |
+          nohup npm start > api.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -s -o /dev/null "http://localhost:$PORT/api/categorias"; then
+              echo "La API está respondiendo"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "::error::La API no respondió en 30 segundos"
+          cat api.log
+          exit 1
+
+      - name: Ejecutar la colección de Postman
+        run: |
+          mkdir -p resultados
+          npx --yes newman@6 run "$COLECCION" \
+            --env-var "baseUrl=http://localhost:$PORT/api" \
+            --reporters cli,junit \
+            --reporter-junit-export resultados/newman.xml
+
+      - name: Guardar resultados y log de la API
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: resultados-pruebas-api
+          path: |
+            resultados/
+            api.log
+          if-no-files-found: ignore
