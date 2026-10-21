@@ -1,5 +1,6 @@
 import express from "express";
 import ciudadesControllers from "../controllers/ciudadesControllers.js";
+import validarId from "../middlewares/validarId.js";
 
 
 const router = express.Router();
@@ -16,6 +17,7 @@ router.get('/estadisticas', ciudadesControllers.estadisticas)
 
 //Métodos con /:id 
 router.route('/:id')
+ .all(validarId) //valida el id para PUT, GET, PATCH Y DELETE
  .put(ciudadesControllers.actualizar)  //Método  PUT
 
 //Método Get id

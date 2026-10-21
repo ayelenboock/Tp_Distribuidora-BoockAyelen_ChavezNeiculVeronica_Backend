@@ -1,12 +1,14 @@
 {
-  "name": "tp4_boockayelen_chavezneiculveronica_backend",
+  "name": "tp5_boockayelen_chavezneiculveronica_backend",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsx --watch src/index.ts",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "build": "prisma generate && tsc",
+    "postinstall": "prisma generate"
   },
   "keywords": [],
   "author": "",
@@ -16,28 +18,26 @@
     "@prisma/adapter-mariadb": "^7.10.0",
     "@prisma/client": "^7.10.0",
     "cors": "^2.8.6",
-    "dot-env": "^0.0.1",
     "dotenv": "^18.0.8",
     "express": "^5.3.0",
-    "morgan": "^1.12.1",
-    "mysql2": "^3.24.5"
+    "mariadb": "^3.5.4",
+    "morgan": "^1.12.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/morgan": "^1.9.10",
     "@types/node": "^26.6.5",
-    "nodemon": "^3.1.14",
     "prisma": "^7.10.0",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/veroc1920/Tp4_BoockAyelen_ChavezNeiculVeronica_Backend.git"
+    "url": "git+https://github.com/ayelenboock/Tp_Distribuidora-BoockAyelen_ChavezNeiculVeronica_Backend.git"
   },
   "bugs": {
-    "url": "https://github.com/veroc1920/Tp4_BoockAyelen_ChavezNeiculVeronica_Backend/issues"
+    "url": "https://github.com/ayelenboock/Tp_Distribuidora-BoockAyelen_ChavezNeiculVeronica_Backend/issues"
   },
-  "homepage": "https://github.com/veroc1920/Tp4_BoockAyelen_ChavezNeiculVeronica_Backend#readme"
+  "homepage": "https://github.com/ayelenboock/Tp_Distribuidora-BoockAyelen_ChavezNeiculVeronica_Backend#readme"
 }

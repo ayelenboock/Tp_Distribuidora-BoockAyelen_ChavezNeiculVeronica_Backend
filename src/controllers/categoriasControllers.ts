@@ -1,66 +1,43 @@
-import type { Request, Response } from 'express';
-//import CategoriasModel from '../models/categoriasModels.js';
-import {prisma} from "../config/prisma.js";
+import type { Request, Response, NextFunction } from 'express';
+import CategoriasModel from '../models/categoriasModels.js';
+
 
 class CategoriasController {
     constructor () { }
 //Creamos los métodos para reemplazar las funciones en Routes
 //GET
-    async consultar(req: Request, res: Response) {
+    async consultar(req: Request, res: Response, next: NextFunction) {
         try{
-            const categorias = await prisma.categorias.findMany();
+            const categorias = await CategoriasModel.obtenerTodos();
 
             return res.status(200).json({
                 total: categorias.length,
                 categorias: categorias
             });
         }catch(err){
-            if(err instanceof Error)
-                res.status(500).json({error:err.message});
+            next(err); // lo maneja el middleware global de errores
         }
     }
 
 //GET categorías por nombre
-    async buscar(req:Request, res:Response) {
+    async buscar(req:Request, res:Response, next: NextFunction) {
         try{
             const { texto }=req.params;
-        const result = await prisma.categorias.findMany({
-            where:{
-                nombre:{
-                    
-                    contains: String(texto),
-                    mode: 'insensitive' //para que no importe si es MAYUSC o min
-                }
-            }
-        });
+        const result = await CategoriasModel.buscarPorNombre(String(texto))
+        
         return res.status(200).json({ 
             total: result.length, 
             categorias: result 
         });
     }catch(err){
-            if(err instanceof Error)
-                res.status(500).json({error:err.message});
-        }
+        next(err); // lo maneja el middleware global de errores
+    }
     }
 
     //GET estadísticas: unidades vendidas por categoría
-    async estadisticas(req:Request, res:Response) {
+    async estadisticas(req:Request, res:Response, next: NextFunction) {
         try{
-            const resultado = await prisma.categorias.findMany({
-                select: {
-                    id_categoria: true,
-                    nombre: true,
-                    productos: {
-                        select: {
-                            detalles:{
-                                select: {
-                                    cantidad: true
-                                }
-                            }
-                        }
-                    }
-                }
-            });
+            const resultado = await CategoriasModel.obtenerEstadisticas();
             //formatear los datos para que devuelva la categoria junto al total de unidades sumadas
             const estadisticasFormateadas = resultado.map(cat => {
                  // Sumamos todas las cantidades de todos los productos de esta categoría
@@ -77,13 +54,12 @@ class CategoriasController {
         });
         return res.status(200).json({ estadisticas: estadisticasFormateadas });
         }catch(err){
-            if(err instanceof Error)
-                 return res.status(500).json({error:err.message});
-            }
+            next(err); // lo maneja el middleware global de errores
+        }
         }
 
 //POST
-    async ingresar(req:Request, res:Response) {
+    async ingresar(req:Request, res:Response, next: NextFunction) {
         try{
             const {nombre, descripcion } = req.body;
 
@@ -91,11 +67,9 @@ class CategoriasController {
                 return res.status(400).json({error: 'faltan campos obligatorios'});
             }
             
-            const nuevaCategoria = await prisma.categorias.create({
-                data:{
-                    nombre: nombre,
-                    descripcion: descripcion
-                } 
+            const nuevaCategoria = await CategoriasModel.crear({
+                nombre: nombre,
+                descripcion: descripcion
             });
             return res.status (201).json({
                 mensaje: 'Categoría creada con éxito',
@@ -103,23 +77,17 @@ class CategoriasController {
             });
 
             }catch(err){
-
-                if(err instanceof Error)
-                   return  res.status(500).json({error:err.message});
-                }
+                next(err); // lo maneja el middleware global de errores
+            }
             }
     
 
  //GET id
-    async consultarDetalle(req:Request, res:Response) {
+    async consultarDetalle(req:Request, res:Response, next: NextFunction) {
         try{
             const { id } = req.params;
 
-        const categoria = await prisma.categorias.findUnique({
-            where: {
-                id_categoria: Number(id)
-            }
-        });
+        const categoria = await CategoriasModel.obtenerPorId(Number(id));
         //si prisma no encuentra el registro, devuelve un null
         if (!categoria) {
                 return res.status(404).json({ error: 'Categoría no encontrada' });
@@ -127,39 +95,28 @@ class CategoriasController {
         //devolver el objeto directamente
         return res.status(200).json(categoria);
         }catch(err){
-            if(err instanceof Error)
-                return res.status(500).json({error:err.message});
+            next(err); // lo maneja el middleware global de errores
         }
     }
 //PUT
-    async actualizar(req:Request, res:Response) {
+    async actualizar(req:Request, res:Response, next: NextFunction) {
         try{
             const id  = Number( req.params.id);
             const { nombre, descripcion } = req.body;
             if (!nombre ||!descripcion) {
                 return res.status(400).json({error: 'faltan campos obligatorios'});
             }
-            const categoriaExistente = await prisma.categorias.findUnique({
-                where: {
-                    id_categoria: Number(id)
-                }
-            });
+            const categoriaExistente = await CategoriasModel.obtenerPorId(id);
 
             if (!categoriaExistente) {
-                return res.status(404).json({ 
+                return res.status(404).json({
                     error: 'Categoría no encontrada'
                  });
             }
 
-            const categoriaActualizado= await prisma.categorias.update({
-                where: { 
-                    id_categoria: Number(id)
-                 },
-                data: {
-                    nombre: nombre,
-                    descripcion: descripcion
-
-                }
+            const categoriaActualizado= await CategoriasModel.actualizar(id, {
+                nombre: nombre,
+                descripcion: descripcion
             });
             //prisma devuelve el registro recien modificado de forma directa
             return res.status(200).json({
@@ -168,68 +125,65 @@ class CategoriasController {
             });
            
             }catch(err){
-               if(err instanceof Error){
-                    return res.status(500).json({error:err.message});
-             }
-        }
+                next(err); // lo maneja el middleware global de errores
+            }
     }
 //PATCH
-    async actualizarParcial(req:Request, res:Response) {
-        try{
-            const { id } = req.params;
-            const campos = req.body;
+    async actualizarParcial(req:Request, res:Response, next: NextFunction) {
+        try {
+            const id = Number(req.params.id);
 
-            if (!campos || Object.keys(campos).length === 0) {
-                return res.status(400).json({ error: 'No se proporcionaron campos para actualizar' });
+            // Lista de columnas que se pueden modificar
+            const permitidos = ['nombre', 'descripcion'];
+
+            // Nos quedamos solo con los campos permitidos que vinieron en el body
+            const campos: Record<string, any> = Object.fromEntries(
+                Object.entries(req.body ?? {}).filter(([key]) => permitidos.includes(key))
+            );
+
+            if (Object.keys(campos).length === 0) {
+                return res.status(400).json({ error: 'No se proporcionaron campos válidos para actualizar' });
             }
-        
-            const categoriaActualizada = await prisma.categorias.update({
-                where: {
-                    id_categoria: Number(id)
-                },
-                data: campos
-            });
+
+            // Verificamos que la categoría exista
+            const categoriaExistente = await CategoriasModel.obtenerPorId(id);
+
+            if (!categoriaExistente) {
+                return res.status(404).json({ error: 'Categoría no encontrada' });
+            }
+
+            const categoriaActualizada = await CategoriasModel.actualizarParcial(id, campos);
+
             return res.status(200).json({
-                mensaje: 'Categoria actualizada con éxito',
+                mensaje: 'Categoría actualizada con éxito',
                 categoria: categoriaActualizada
             });
-            
-        }catch(err){
-            if(err instanceof Error)
-                return res.status(500).json({error:err.message});
-        }
-    }
+           }catch(err){
+               next(err); // lo maneja el middleware global de errores
+           }
 
-    async eliminar(req:Request, res:Response) {
+        }
+
+    async eliminar(req:Request, res:Response, next: NextFunction) {
         try{
             const  id  = Number(req.params.id);
             //verificamos si la categoria existe antes de intentar borrarlo
-            const categoriaExistente = await prisma.categorias.findUnique({
-                where: {id_categoria: Number(id)
-
-                }
-            }) ;
+            const categoriaExistente = await CategoriasModel.obtenerPorId(id);
 
             if (!categoriaExistente) {
               return res.status(404).json({
                  error: 'Categoría no encontrada' });
             }
             //si existe, lo eliminamos de la base de datos
-            await prisma.categorias.delete({
-                where: {
-                    id_categoria: Number(id)
-                }
-            });
+            await CategoriasModel.eliminar(id);
             //devolvemos un mensaje de exito
 
             return res.status(200).json({
                  mensaje: 'Categoría eliminada con éxito' });
             }catch(err){
-            if(err instanceof Error)
-                res.status(500).json({
-            error:err.message
-        });
-        }
+                next(err); // lo maneja el middleware global de errores
+            }
+        
     }
 
 }

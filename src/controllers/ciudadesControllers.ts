@@ -1,59 +1,37 @@
-import type { Request, Response } from 'express';
-//import ciudadesModel from '../models/ciudadesModels.js';
-import {prisma} from "../config/prisma.js";
+import type { Request, Response, NextFunction } from 'express';
+import CiudadesModel from '../models/ciudadesModels.js';
 class CiudadesController {
     constructor () { }
 //Creamos los métodos para reemplazar las funciones en Routes
 //GET
-    async consultar(req:Request, res:Response) {
+    async consultar(req:Request, res:Response, next: NextFunction) {
         try{
-            const ciudades = await prisma.ciudades.findMany();
+            const ciudades = await CiudadesModel.obtenerTodos();
             return res.status(200).json({
                 total: ciudades.length,
                 ciudades: ciudades
             });
             }catch(err){
-
-               if(err instanceof Error)
-
-                res.status(500).json({error:err.message});
-        }
+                next(err); // lo maneja el middleware global de errores
+            }
     }
 
 //GET categorías por nombre
-    async buscar(req:Request, res:Response) {
+    async buscar(req:Request, res:Response, next: NextFunction) {
         try{
             const { texto }= req.params;
-            const result= await prisma.ciudades.findMany({
-                where: {
-                    nombre: {
-                        contains: String(texto),
-                        mode: 'insensitive'
-                    }
-                }
-            });
-            return res.status(200).json({ 
-                total: result.length, 
-                categorias: result });
+            const result= await CiudadesModel.buscarPorNombre(String(texto));
+            return res.status(200).json({
+                total: result.length,
+                ciudades: result });
             }catch(err){
-              if(err instanceof Error)
-                  res.status(500).json({error:err.message});
-           }
+                next(err); // lo maneja el middleware global de errores
+            }
     }
     //GET estadísticas: unidades vendidas por ciudad
-async estadisticas(req: Request, res: Response) {
+async estadisticas(req: Request, res: Response, next: NextFunction) {
     try {
-        const resultado = await prisma.ciudades.findMany({
-            select: {
-                id_ciudad: true,
-                nombre: true,
-                _count: {
-                    select: {
-                        clientes: true // Cuenta cuántos clientes pertenecen a esta ciudad
-                    }
-                }
-            }
-        });
+        const resultado = await CiudadesModel.obtenerEstadisticas();
 
         // para retornar el objeto en el .map()
         const estadisticasFormateadas = resultado.map(ciudad => ({
@@ -65,25 +43,21 @@ async estadisticas(req: Request, res: Response) {
         return res.status(200).json({ estadisticas: estadisticasFormateadas });
 
     } catch (err) {
-        if (err instanceof Error) {
-            return res.status(500).json({ error: err.message });
-        }
+        next(err); // lo maneja el middleware global de errores
     }
 }
 
 //POST
-    async ingresar(req:Request, res:Response) {
+    async ingresar(req:Request, res:Response, next: NextFunction) {
         try{
             const {nombre } = req.body;
 
             if (!nombre ) {
                 return res.status(400).json({error: 'faltan campos obligatorios'});
             }
-            
-            const nuevaCiudad  = await prisma.ciudades.create({ 
-                data:{
-                    nombre:nombre
-             }
+
+            const nuevaCiudad  = await CiudadesModel.crear({
+                nombre:nombre
             });
 
              return res.status (201).json({
@@ -91,21 +65,16 @@ async estadisticas(req: Request, res: Response) {
                 id: nuevaCiudad.id_ciudad
             });
             }catch(err){
-               if(err instanceof Error)
-                 return  res.status(500).json({error:err.message});
-           }
+                next(err); // lo maneja el middleware global de errores
+            }
        }
 
  //GET id
-    async consultarDetalle(req:Request, res:Response) {
+    async consultarDetalle(req:Request, res:Response, next: NextFunction) {
         try{
             const { id } = req.params;
 
-            const ciudad = await prisma.ciudades.findUnique({
-                where: {
-                    id_ciudad: Number(id)
-                }
-            });
+            const ciudad = await CiudadesModel.obtenerPorId(Number(id));
 
             if (!ciudad) {
                 return res.status(404).json({ error: 'Ciudad no encontrada' });
@@ -113,35 +82,25 @@ async estadisticas(req: Request, res: Response) {
 
             return res.status(200).json(ciudad);
             }catch(err){
-            if(err instanceof Error)
-                 return res.status(500).json({error:err.message});
-           }
+                next(err); // lo maneja el middleware global de errores
+            }
         }
 //PUT
-    async actualizar(req:Request, res:Response) {
+    async actualizar(req:Request, res:Response, next: NextFunction) {
         try{
             const  id  =Number(req.params.id);
             const { nombre} = req.body;
 
-            const ciudadExiste = await prisma.ciudades.findUnique({
-                where: {
-                    id_ciudad: Number(id)
-                }
-            });
+            const ciudadExiste = await CiudadesModel.obtenerPorId(id);
 
             if (!ciudadExiste) {
-                return res.status(404).json({ 
-                    error: 'Ciudad no encontrada' 
+                return res.status(404).json({
+                    error: 'Ciudad no encontrada'
                 });
             }
 
-            const ciudadActualizada = await prisma.ciudades.update({
-                where: {
-                    id_ciudad: Number(id)
-                },
-                data: {
-                    nombre: nombre
-                }
+            const ciudadActualizada = await CiudadesModel.actualizar(id, {
+                nombre: nombre
             });
 
              return res.status(200).json({
@@ -149,61 +108,59 @@ async estadisticas(req: Request, res: Response) {
                 ciudad: ciudadActualizada
             });
             }catch(err){
-              if(err instanceof Error)
-                return  res.status(500).json({error:err.message});
-        }
-    
+                next(err); // lo maneja el middleware global de errores
+            }
+
     }
 //PATCH
-    async actualizarParcial(req:Request, res:Response) {
+    async actualizarParcial(req:Request, res:Response, next: NextFunction) {
         try{
-            const { id } = req.params;
-            const campos = req.body;
+            const id = Number(req.params.id);
 
-            if (!campos || Object.keys(campos).length === 0) {
-                return res.status(400).json({ error: 'No se proporcionaron campos para actualizar' });
+            // Lista de columnas que se pueden modificar
+            const permitidos = ['nombre'];
+
+            // Nos quedamos solo con los campos permitidos que vinieron en el body
+            const campos: Record<string, any> = Object.fromEntries(
+                Object.entries(req.body ?? {}).filter(([key]) => permitidos.includes(key))
+            );
+
+            if (Object.keys(campos).length === 0) {
+                return res.status(400).json({ error: 'No se proporcionaron campos válidos para actualizar' });
             }
-        
-            const ciudadActualizada = await prisma.ciudades.update({
-                where: {
-                    id_ciudad: Number(id)
-                },
-                data:campos
-            });
+
+            // Verificamos que la ciudad exista
+            const ciudadExiste = await CiudadesModel.obtenerPorId(id);
+
+            if (!ciudadExiste) {
+                return res.status(404).json({ error: 'Ciudad no encontrada' });
+            }
+
+            const ciudadActualizada = await CiudadesModel.actualizarParcial(id, campos);
             return res.status(200).json({
                  mensaje: 'Ciudad actualizada con éxito',
                 ciudad: ciudadActualizada
              });
             }catch(err){
-            if(err instanceof Error)
-                return res.status(500).json({error:err.message});
-        }
+                next(err); // lo maneja el middleware global de errores
+            }
     }
 
-    async eliminar(req:Request, res:Response) {
+    async eliminar(req:Request, res:Response, next: NextFunction) {
         try{
             const  id  = Number(req.params.id);
 
-            const ciudadExiste = await prisma.ciudades.findUnique({
-                where: {id_ciudad:Number(id)
-
-                }
-            });
+            const ciudadExiste = await CiudadesModel.obtenerPorId(id);
 
             if (!ciudadExiste) {
-              return res.status(404).json({ 
+              return res.status(404).json({
                 error: 'Ciudad no encontrada' });
             }
-            await prisma.ciudades.delete({
-                where: {
-                    id_ciudad: Number(id)
-                }
-            });
+            await CiudadesModel.eliminar(id);
             return res.status(200).json({
                  mensaje: 'Ciudad eliminada con éxito' });
             }catch(err){
-                if(err instanceof Error)
-                   res.status(500).json({error:err.message});
+                next(err); // lo maneja el middleware global de errores
             }
        }
 

@@ -1,70 +1,69 @@
-//import db from '../database/conexion.js'
+import { prisma } from "../config/prisma.js";
+import type { Prisma } from "../generated/prisma/client.js";
 
 class CiudadesModel {
-    async obtenerTodos() { 
-        return await db.query('SELECT * FROM ciudades');
+    async obtenerTodos() {
+        return await prisma.ciudades.findMany();
     }
 
     // Filtrar ciudad por nombre
-    async buscarPorNombre(texto) {
-        return await db.query('SELECT * FROM ciudades WHERE nombre LIKE ?', [`%${texto}%`]);
+    async buscarPorNombre(texto: string) {
+        return await prisma.ciudades.findMany({
+            where: {
+                nombre: {
+                    contains: texto
+                }
+            }
+        });
     }
 
-    //Unidades vendidas por ciudad
+    //Cantidad de clientes por ciudad
     async obtenerEstadisticas() {
-        return await db.query(`
-            SELECT c.id_ciudad, c.nombre,
-                   COALESCE(SUM(d.cantidad), 0) AS unidades_vendidas
-            FROM ciudades c
-            LEFT JOIN productos pr ON pr.id_ciudad = c.id_ciudad
-            LEFT JOIN detalles_pedidos d ON d.id_producto = pr.id_producto
-            GROUP BY c.id_ciudad, c.nombre
-        `);
+        return await prisma.ciudades.findMany({
+            select: {
+                id_ciudad: true,
+                nombre: true,
+                _count: {
+                    select: {
+                        clientes: true // Cuenta cuántos clientes pertenecen a esta ciudad
+                    }
+                }
+            }
+        });
     }
 
-
-
-    async crear({ nombre }) {
-        return await db.query( 
-                `INSERT INTO ciudades (nombre) VALUES (?)`,
-                [nombre]
-            );
+    async crear(datos: Prisma.CiudadesUncheckedCreateInput) {
+        return await prisma.ciudades.create({
+            data: datos
+        });
     }
 
-    async obtenerPorId(id) {
-        return await db.query('SELECT * FROM ciudades WHERE id_ciudad = ?', [id]);
+    async obtenerPorId(id: number) {
+        return await prisma.ciudades.findUnique({
+            where: { id_ciudad: id }
+        });
     }
-    async actualizar(id, { nombre }) { 
-        return await db.query(
-                `UPDATE ciudades SET nombre = ? WHERE id_ciudad = ?`,
-                [nombre, id]
-            );
+
+    async actualizar(id: number, datos: Prisma.CiudadesUncheckedUpdateInput) {
+        return await prisma.ciudades.update({
+            where: { id_ciudad: id },
+            data: datos
+        });
     }
-    async eliminar(id) { 
-        return await db.query(
-                'DELETE FROM ciudades WHERE id_ciudad = ?', 
-                [id]);
-     }
-    async actualizarParcial(id, campos) { 
-        const permitidos = ['nombre'];
-        const keys = Object.keys(campos).filter(key => permitidos.includes(key));
 
-        if (keys.length === 0) {
-            const error = new Error('No se proporcionaron campos válidos para actualizar'); 
-            error.status = 400;
-            throw error;
-        }
+    async eliminar(id: number) {
+        return await prisma.ciudades.delete({
+            where: { id_ciudad: id }
+        });
+    }
 
-        const setClause = keys.map(key => `${key} = ?`).join(', ');
-            
-        const values = keys.map(key => campos[key]);
-        values.push(id); 
-
-        return await db.query(
-            `UPDATE ciudades SET ${setClause} WHERE id_ciudad = ?`, 
-            values
-        );
-     }
+    // Recibe solo los campos permitidos (el filtrado se hace en el controlador)
+    async actualizarParcial(id: number, campos: Prisma.CiudadesUncheckedUpdateInput) {
+        return await prisma.ciudades.update({
+            where: { id_ciudad: id },
+            data: campos
+        });
+    }
 }
 
 export default new CiudadesModel()

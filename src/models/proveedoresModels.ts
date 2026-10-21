@@ -1,71 +1,67 @@
-//import db from '../database/conexion.js'
+import { prisma } from "../config/prisma.js";
+import type { Prisma, ProveedoresCondicionIva } from "../generated/prisma/client.js";
 
 class ProveedoresModel {
-    async obtenerTodos() { 
-        return await db.query('SELECT * FROM proveedores');
-     }
-    
+    async obtenerTodos() {
+        return await prisma.proveedores.findMany();
+    }
+
     // Filtrar proveedores según su condición de IVA
-    async obtenerPorCondicion(condicion) {
-        return await db.query('SELECT * FROM proveedores WHERE condicion_iva = ?', [condicion]);
+    async obtenerPorCondicion(condicion: ProveedoresCondicionIva) {
+        return await prisma.proveedores.findMany({
+            where: {
+                condicion_iva: condicion
+            }
+        });
     }
 
-    //Cantidad de productos y stock por proveedor
+    //Cantidad de productos y stock por proveedor (JOIN proveedores -> productos)
     async obtenerEstadisticas() {
-        return await db.query(`
-            SELECT pv.id_proveedor, pv.razon_social,
-                   COUNT(pr.id_producto) AS cantidad_productos,
-                   COALESCE(SUM(pr.stock), 0) AS stock_total
-            FROM proveedores pv
-            LEFT JOIN productos pr ON pr.id_proveedor = pv.id_proveedor
-            GROUP BY pv.id_proveedor, pv.razon_social
-        `);
+        return await prisma.proveedores.findMany({
+            select: {
+                id_proveedor: true,
+                razon_social: true,
+                productos: {
+                    select: {
+                        stock: true
+                    }
+                }
+            }
+        });
     }
 
-    async crear({ razon_social, nombre_contacto, telefono, email, direccion, id_ciudad,condicion_iva }) {
-        return await db.query(
-                `INSERT INTO proveedores (razon_social, nombre_contacto, telefono, email, direccion,id_ciudad, condicion_iva) VALUES (?,?, ?, ?, ?, ?, ?)`,
-                [razon_social, nombre_contacto, telefono, email, direccion, id_ciudad,condicion_iva]
-            );
+    async crear(datos: Prisma.ProveedoresUncheckedCreateInput) {
+        return await prisma.proveedores.create({
+            data: datos
+        });
     }
 
-    async obtenerPorId(id) {
-        return await db.query('SELECT * FROM proveedores WHERE id_proveedor = ?', [id]);
+    async obtenerPorId(id: number) {
+        return await prisma.proveedores.findUnique({
+            where: { id_proveedor: id }
+        });
     }
 
-    async actualizar(id, { razon_social, nombre_contacto, telefono, email, direccion,id_ciudad, condicion_iva }) { 
-        return await db.query(
-                `UPDATE proveedores SET razon_social = ?, nombre_contacto = ?, telefono = ?, email = ?, direccion = ?, id_ciudad=?,condicion_iva = ? WHERE id_proveedor = ?`,
-                [razon_social, nombre_contacto, telefono, email, direccion,id_ciudad, condicion_iva, id]
-            );
+    async actualizar(id: number, datos: Prisma.ProveedoresUncheckedUpdateInput) {
+        return await prisma.proveedores.update({
+            where: { id_proveedor: id },
+            data: datos
+        });
     }
 
-    async eliminar(id) { 
-        return await db.query(
-                'DELETE FROM proveedores WHERE id_proveedor = ?', 
-                [id]);
+    async eliminar(id: number) {
+        return await prisma.proveedores.delete({
+            where: { id_proveedor: id }
+        });
     }
 
-    async actualizarParcial(id, campos) { 
-        const permitidos = ['razon_social', 'nombre_contacto', 'telefono', 'email', 'direccion','id_ciudad', 'condicion_iva'];
-        const keys = Object.keys(campos).filter(key => permitidos.includes(key));
-
-        if (keys.length === 0) {
-            const error = new Error('No se proporcionaron campos válidos para actualizar'); 
-            error.status = 400;
-            throw error;
-        }
-
-        const setClause = keys.map(key => `${key} = ?`).join(', ');
-            
-        const values = keys.map(key => campos[key]);
-        values.push(id);
-
-        return await db.query(
-            `UPDATE proveedores SET ${setClause} WHERE id_proveedor = ?`, 
-            values
-        );
-     }
+    // Recibe solo los campos permitidos (el filtrado se hace en el controlador)
+    async actualizarParcial(id: number, campos: Prisma.ProveedoresUncheckedUpdateInput) {
+        return await prisma.proveedores.update({
+            where: { id_proveedor: id },
+            data: campos
+        });
+    }
 }
 
 export default new ProveedoresModel()

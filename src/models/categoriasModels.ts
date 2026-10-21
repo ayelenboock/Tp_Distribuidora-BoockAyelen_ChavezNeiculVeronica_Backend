@@ -1,70 +1,73 @@
-//import db from '../database/conexion.js'
+import { prisma } from "../config/prisma.js";
+import type { Prisma } from "../generated/prisma/client.js";
 
 class CategoriasModel {
-    async obtenerTodos() { 
-        return await db.query('SELECT * FROM categorias');
+    async obtenerTodos() {
+        return await prisma.categorias.findMany();
     }
 
     // Filtrar categorías por nombre
-    async buscarPorNombre(texto) {
-        return await db.query('SELECT * FROM categorias WHERE nombre LIKE ?', [`%${texto}%`]);
+    async buscarPorNombre(texto: string) {
+        return await prisma.categorias.findMany({
+            where: {
+                nombre: {
+                    contains: texto
+                }
+            }
+        });
     }
 
-    //Unidades vendidas por categoría
+    //Unidades vendidas por categoría (JOIN categorias -> productos -> detalles_pedidos)
     async obtenerEstadisticas() {
-        return await db.query(`
-            SELECT c.id_categoria, c.nombre,
-                   COALESCE(SUM(d.cantidad), 0) AS unidades_vendidas
-            FROM categorias c
-            LEFT JOIN productos pr ON pr.id_categoria = c.id_categoria
-            LEFT JOIN detalles_pedidos d ON d.id_producto = pr.id_producto
-            GROUP BY c.id_categoria, c.nombre
-        `);
+        return await prisma.categorias.findMany({
+            select: {
+                id_categoria: true,
+                nombre: true,
+                productos: {
+                    select: {
+                        detalles: {
+                            select: {
+                                cantidad: true
+                            }
+                        }
+                    }
+                }
+            }
+        });
     }
 
-
-
-    async crear({ nombre, descripcion }) {
-        return await db.query( 
-                `INSERT INTO categorias (nombre, descripcion) VALUES (?, ?)`,
-                [nombre, descripcion]
-            );
+    async crear(datos: Prisma.CategoriasUncheckedCreateInput) {
+        return await prisma.categorias.create({
+            data: datos
+        });
     }
 
-    async obtenerPorId(id) {
-        return await db.query('SELECT * FROM categorias WHERE id_categoria = ?', [id]);
+    async obtenerPorId(id: number) {
+        return await prisma.categorias.findUnique({
+            where: { id_categoria: id }
+        });
     }
-    async actualizar(id, { nombre, descripcion }) { 
-        return await db.query(
-                `UPDATE categorias SET nombre = ?, descripcion = ? WHERE id_categoria = ?`,
-                [nombre, descripcion, id]
-            );
+
+    async actualizar(id: number, datos: Prisma.CategoriasUncheckedUpdateInput) {
+        return await prisma.categorias.update({
+            where: { id_categoria: id },
+            data: datos
+        });
     }
-    async eliminar(id) { 
-        return await db.query(
-                'DELETE FROM categorias WHERE id_categoria = ?', 
-                [id]);
-     }
-    async actualizarParcial(id, campos) { 
-        const permitidos = ['nombre', 'descripcion'];
-        const keys = Object.keys(campos).filter(key => permitidos.includes(key));
 
-        if (keys.length === 0) {
-            const error = new Error('No se proporcionaron campos válidos para actualizar'); 
-            error.status = 400;
-            throw error;
-        }
+    async eliminar(id: number) {
+        return await prisma.categorias.delete({
+            where: { id_categoria: id }
+        });
+    }
 
-        const setClause = keys.map(key => `${key} = ?`).join(', ');
-            
-        const values = keys.map(key => campos[key]);
-        values.push(id); 
-
-        return await db.query(
-            `UPDATE categorias SET ${setClause} WHERE id_categoria = ?`, 
-            values
-        );
-     }
+    // Recibe solo los campos permitidos (el filtrado se hace en el controlador)
+    async actualizarParcial(id: number, campos: Prisma.CategoriasUncheckedUpdateInput) {
+        return await prisma.categorias.update({
+            where: { id_categoria: id },
+            data: campos
+        });
+    }
 }
 
 export default new CategoriasModel()

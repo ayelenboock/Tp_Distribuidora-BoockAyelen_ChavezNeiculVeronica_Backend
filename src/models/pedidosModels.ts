@@ -1,103 +1,80 @@
-//import db from '../database/conexion.js'
+import { prisma } from "../config/prisma.js";
+import type { Prisma, PedidosEstado } from "../generated/prisma/client.js";
 
 class PedidosModel {
-    async obtenerTodos() { 
-        return await db.query(`
-            SELECT p.*,
-                   c.nombre AS cliente_nombre,
-                   c.apellido AS cliente_apellido,
-                   e.nombre AS empleado_nombre,
-                   e.apellido AS empleado_apellido,
-                   ce.nombre AS compania_nombre
-            FROM pedidos p
-            JOIN clientes c ON p.id_cliente = c.id_cliente
-            JOIN compania_envio ce ON p.id_compania = ce.id_compania
-            JOIN empleados e ON p.id_empleado = e.id_empleado
-            `);
-     }
-
-    async crear({ id_cliente, id_empleado, id_compania, total= 0, estado = 'Pendiente' }) {
-        return await db.query( 
-                `INSERT INTO pedidos (id_cliente, id_empleado, id_compania, total, estado) VALUES (?, ?, ?, ?, ?)`,
-                [id_cliente, id_empleado, id_compania, total, estado]
-            );
+    // Trae los pedidos con los datos del cliente, empleado y compañía (JOIN)
+    async obtenerTodos() {
+        return await prisma.pedidos.findMany({
+            include: {
+                cliente: true,
+                empleado: true,
+                compania_envio: true
+            }
+        });
     }
 
-        // Filtro para obtener pedidos por estado
-    async obtenerPorEstado(estado) {
-        return await db.query('SELECT * FROM pedidos WHERE estado = ?', [estado]);
+    async crear(datos: Prisma.PedidosUncheckedCreateInput) {
+        return await prisma.pedidos.create({
+            data: datos
+        });
     }
 
-    // Agregación para obtener estadísticas de pedidos por mes
+    // Filtro para obtener pedidos por estado
+    async obtenerPorEstado(estado: PedidosEstado) {
+        return await prisma.pedidos.findMany({
+            where: {
+                estado: estado
+            }
+        });
+    }
+
+    // Agregación: cantidad de pedidos y total facturado por estado
     async obtenerEstadisticas() {
-        return await db.query(`
-            SELECT DATE_FORMAT(fecha, '%Y-%m') AS mes,
-                   COUNT(*) AS cantidad_pedidos,
-                   SUM(total) AS total_facturado
-            FROM pedidos
-            GROUP BY mes
-        `);
+        return await prisma.pedidos.groupBy({
+            by: ['estado'],
+            _count: {
+                id_pedido: true
+            },
+            _sum: {
+                total: true
+            }
+        });
     }
 
-    async obtenerPorId(id) {
-        return await db.query(`
-            SELECT p.*,
-                   c.nombre AS cliente_nombre,
-                   c.apellido AS cliente_apellido,
-                   e.nombre AS empleado_nombre,
-                   e.apellido AS empleado_apellido,
-                   ce.nombre AS compania_nombre
-            FROM pedidos p
-            JOIN clientes c ON p.id_cliente = c.id_cliente
-            JOIN compania_envio ce ON p.id_compania = ce.id_compania
-            JOIN empleados e ON p.id_empleado = e.id_empleado
-             WHERE p.id_pedido = ?`, [id]);
+    // Trae el pedido con sus detalles y los productos de cada detalle (JOIN)
+    async obtenerPorId(id: number) {
+        return await prisma.pedidos.findUnique({
+            where: { id_pedido: id },
+            include: {
+                detalles: {
+                    include: {
+                        producto: true
+                    }
+                }
+            }
+        });
     }
 
-    async obtenerDetalle(id) {
-        return await db.query(`
-            SELECT d.id_detalle,
-                   d.id_producto,
-                   pr.nombre_producto,
-                   d.cantidad,
-                   d.precio_unitario,
-                   d.cantidad * d.precio_unitario AS subtotal
-            FROM detalles_pedidos d
-            JOIN productos pr ON d.id_producto = pr.id_producto
-            WHERE d.id_pedido = ?`, [id]);
+    async actualizar(id: number, datos: Prisma.PedidosUncheckedUpdateInput) {
+        return await prisma.pedidos.update({
+            where: { id_pedido: id },
+            data: datos
+        });
     }
 
-    async actualizar(id, { id_cliente, id_empleado, id_compania, total, estado }) { 
-        return await db.query(
-                `UPDATE pedidos SET id_cliente = ?, id_empleado = ?, id_compania = ?, total = ?, estado = ? WHERE id_pedido = ?`,
-                [id_cliente, id_empleado, id_compania, total, estado, id]
-            );
+    async eliminar(id: number) {
+        return await prisma.pedidos.delete({
+            where: { id_pedido: id }
+        });
     }
-    async eliminar(id) { 
-        return await db.query(
-                'DELETE FROM pedidos WHERE id_pedido = ?', 
-                [id]);
-     }
-    async actualizarParcial(id, campos) { 
-        const permitidos = ['id_cliente', 'id_empleado', 'id_compania', 'total', 'estado'];
-        const keys = Object.keys(campos).filter(key => permitidos.includes(key));
 
-        if (keys.length === 0) {
-            const error = new Error('No se proporcionaron campos válidos para actualizar'); 
-            error.status = 400;
-            throw error;
-        }
-
-        const setClause = keys.map(key => `${key} = ?`).join(', ');
-            
-        const values = keys.map(key => campos[key]);
-        values.push(id); 
-
-        return await db.query(
-            `UPDATE pedidos SET ${setClause} WHERE id_pedido = ?`, 
-            values
-        );
-     }
+    // Recibe solo los campos permitidos (el filtrado se hace en el controlador)
+    async actualizarParcial(id: number, campos: Prisma.PedidosUncheckedUpdateInput) {
+        return await prisma.pedidos.update({
+            where: { id_pedido: id },
+            data: campos
+        });
+    }
 }
 
 export default new PedidosModel()
