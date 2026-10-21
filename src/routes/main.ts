@@ -9,6 +9,7 @@ import pedidosRoutes from "./pedidosRoutes.js"
 import productosRoutes from "./productosRoutes.js"
 import proveedoresRoutes from "./proveedoresRoutes.js"
 import ciudadesRoutes from "./ciudadesRoutes.js"
+import informesRoutes from "./informesRoutes.js"
 
 const router = Router();
 
@@ -20,4 +21,5 @@ router.use("/api/pedidos", pedidosRoutes);
 router.use("/api/productos", productosRoutes);
 router.use("/api/proveedores", proveedoresRoutes);
 router.use("/api/ciudades", ciudadesRoutes);
+router.use("/api/informes", informesRoutes);
 export default router;

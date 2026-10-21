@@ -1,72 +1,72 @@
-//import db from '../database/conexion.js'
+import { prisma } from "../config/prisma.js";
+import type { Prisma, ClientesCondicionIva } from "../generated/prisma/client.js";
 
 class ClientesModel {
-    async obtenerTodos() { 
-        return await db.query('SELECT * FROM clientes');
-     }
-
-    async crear({ nombre, apellido, cuit, razon_social, direccion,id_ciudad, telefono, email, dni, condicion_iva }) {
-        return await db.query(
-                `INSERT INTO clientes (nombre, apellido, cuit, razon_social, direccion, id_ciudad,telefono, email, dni, condicion_iva) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?)`,
-                [nombre, apellido, cuit, razon_social, direccion, id_ciudad,telefono, email, dni, condicion_iva]
-            );
-    }
-    
-       //Filtrar clientes según su condición de IVA
-    async obtenerPorCondicion(condicion) {
-        return await db.query('SELECT * FROM clientes WHERE condicion_iva = ?', [condicion]);
+    async obtenerTodos() {
+        return await prisma.clientes.findMany();
     }
 
-    //Cantidad de pedidos y total comprado por cliente
+    async crear(datos: Prisma.ClientesUncheckedCreateInput) {
+        return await prisma.clientes.create({
+            data: datos
+        });
+    }
+
+    //Filtrar clientes según su condición de IVA (JOIN con ciudades)
+    async obtenerPorCondicion(condicion: ClientesCondicionIva) {
+        return await prisma.clientes.findMany({
+            where: {
+                condicion_iva: condicion
+            },
+            include: {
+                ciudad: true
+            }
+        });
+    }
+
+    //Cantidad de pedidos y total comprado por cliente (JOIN clientes -> pedidos)
     async obtenerEstadisticas() {
-        return await db.query(`
-            SELECT c.id_cliente, c.nombre, c.apellido, c.razon_social,
-                   COUNT(p.id_pedido) AS cantidad_pedidos,
-                   COALESCE(SUM(p.total), 0) AS total_comprado
-            FROM clientes c
-            LEFT JOIN pedidos p ON p.id_cliente = c.id_cliente
-            GROUP BY c.id_cliente, c.nombre, c.apellido, c.razon_social
-        `);
+        return await prisma.clientes.findMany({
+            select: {
+                id_cliente: true,
+                nombre: true,
+                apellido: true,
+                cuit: true,
+                pedidos: {
+                    select: {
+                        total: true
+                    }
+                }
+            }
+        });
     }
 
-
-    async obtenerPorId(id) {
-        return await db.query('SELECT * FROM clientes WHERE id_cliente = ?', [id]);
+    async obtenerPorId(id: number) {
+        return await prisma.clientes.findUnique({
+            where: { id_cliente: id }
+        });
     }
-   
-   async actualizar(id, { nombre, apellido, cuit, razon_social, direccion,id_ciudad, telefono, email, dni, condicion_iva }) { 
-        return await db.query(
-                `UPDATE clientes SET nombre = ?, apellido = ?, cuit = ?, razon_social = ?, direccion = ?,id_ciudad=?, telefono = ?, email = ?, dni = ?, condicion_iva = ? WHERE id_cliente = ?`,
-                [nombre, apellido, cuit, razon_social, direccion,id_ciudad, telefono, email, dni, condicion_iva, id]
-            );
+
+    async actualizar(id: number, datos: Prisma.ClientesUncheckedUpdateInput) {
+        return await prisma.clientes.update({
+            where: { id_cliente: id },
+            data: datos
+        });
     }
-    
-    async eliminar(id) { 
-        return await db.query(
-                'DELETE FROM clientes WHERE id_cliente = ?', 
-                [id]);
-     }
-    
-     async actualizarParcial(id, campos) { 
-        const permitidos = ['nombre', 'apellido', 'cuit', 'razon_social', 'direccion','id_ciudad', 'telefono', 'email', 'dni', 'condicion_iva'];
-        const keys = Object.keys(campos).filter(key => permitidos.includes(key));
 
-        if (keys.length === 0) {
-            const error = new Error('No se proporcionaron campos válidos para actualizar'); 
-            error.status = 400;
-            throw error;
-        }
+    async eliminar(id: number) {
+        return await prisma.clientes.delete({
+            where: { id_cliente: id }
+        });
+    }
 
-        const setClause = keys.map(key => `${key} = ?`).join(', ');
-
-        const values = keys.map(key => campos[key]);
-        values.push(id); 
-
-        return await db.query(
-            `UPDATE clientes SET ${setClause} WHERE id_cliente = ?`, 
-            values
-        );
-     }
+    // Recibe solo los campos permitidos (el filtrado se hace en el controlador)
+    async actualizarParcial(id: number, campos: Prisma.ClientesUncheckedUpdateInput) {
+        return await prisma.clientes.update({
+            where: { id_cliente: id },
+            data: campos
+        });
+    }
 }
 
 export default new ClientesModel()

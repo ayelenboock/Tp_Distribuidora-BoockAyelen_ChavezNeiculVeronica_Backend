@@ -1,7 +1,7 @@
 {
   "info": {
     "_postman_id": "c70fd1af-b1ba-4842-8eb5-417675db5baf",
-    "name": "TP4 Distribuidora - Casos de prueba",
+    "name": "TP5 Distribuidora - Casos de prueba",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "57570309",
     "_collection_link": "https://go.postman.co/collection/57570309-c70fd1af-b1ba-4842-8eb5-417675db5baf?source=collection_link"
@@ -3223,6 +3223,695 @@
       ]
     },
     {
+      "name": "Ciudades",
+      "item": [
+        {
+          "name": "Crear Ciudad",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () {\n    pm.response.to.have.status(201);\n});\n\n// Guarda el id creado para usarlo en las siguientes consultas de la carpeta\nif (pm.response.code === 201) {\n    pm.collectionVariables.set(\"idCiudad\", pm.response.json().id);\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"General Roca\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ciudades",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ciudades"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Consultar Ciudades",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {\n    pm.response.to.have.status(200);\n});\n\npm.test(\"Devuelve el total y la lista de ciudades\", function () {\n    const json = pm.response.json();\n    pm.expect(json).to.have.property(\"total\");\n    pm.expect(json.ciudades).to.be.an(\"array\");\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ciudades",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ciudades"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Consultar Ciudad Id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {\n    pm.response.to.have.status(200);\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ciudades/{{idCiudad}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ciudades",
+                "{{idCiudad}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar Ciudades por Nombre",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {\n    pm.response.to.have.status(200);\n});\n\npm.test(\"Encuentra al menos una ciudad\", function () {\n    pm.expect(pm.response.json().total).to.be.at.least(1);\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ciudades/buscar/roca",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ciudades",
+                "buscar",
+                "roca"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Estadísticas Clientes por Ciudad",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {\n    pm.response.to.have.status(200);\n});\n\npm.test(\"Cada ciudad trae su total de clientes\", function () {\n    const est = pm.response.json().estadisticas;\n    pm.expect(est).to.be.an(\"array\");\n    pm.expect(est[0]).to.have.property(\"total_clientes\");\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ciudades/estadisticas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ciudades",
+                "estadisticas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar Ciudad",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {\n    pm.response.to.have.status(200);\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"General Roca (RN)\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ciudades/{{idCiudad}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ciudades",
+                "{{idCiudad}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar Campos Ciudad",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {\n    pm.response.to.have.status(200);\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Gral. Roca\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ciudades/{{idCiudad}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ciudades",
+                "{{idCiudad}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar Columna No Permitida - PATCH (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {\n    pm.response.to.have.status(400);\n});\n\npm.test(\"Devuelve un mensaje de error en JSON\", function () {\n    pm.expect(pm.response.json()).to.have.property(\"error\");\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_ciudad\": 999\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ciudades/{{idCiudad}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ciudades",
+                "{{idCiudad}}"
+              ]
+            },
+            "description": "id_ciudad no está en la lista de columnas permitidas: se descarta y la API responde 400."
+          },
+          "response": []
+        },
+        {
+          "name": "Borrar Ciudad",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {\n    pm.response.to.have.status(200);\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ciudades/{{idCiudad}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ciudades",
+                "{{idCiudad}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Consultar Ciudad Borrada",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 404\", function () {\n    pm.response.to.have.status(404);\n});\n\npm.test(\"Devuelve un mensaje de error en JSON\", function () {\n    pm.expect(pm.response.json()).to.have.property(\"error\");\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ciudades/{{idCiudad}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ciudades",
+                "{{idCiudad}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear Ciudad Sin Campos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {\n    pm.response.to.have.status(400);\n});\n\npm.test(\"Devuelve un mensaje de error en JSON\", function () {\n    pm.expect(pm.response.json()).to.have.property(\"error\");\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ciudades",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ciudades"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear Ciudad Repetida",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {\n    pm.response.to.have.status(400);\n});\n\npm.test(\"Devuelve un mensaje de error en JSON\", function () {\n    pm.expect(pm.response.json()).to.have.property(\"error\");\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Viedma\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ciudades",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ciudades"
+              ]
+            },
+            "description": "El nombre de la ciudad es UNIQUE. Prisma lanza el error P2002 y el middleware global responde 400."
+          },
+          "response": []
+        },
+        {
+          "name": "Consultar Ciudad con Id No Numérico (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {\n    pm.response.to.have.status(400);\n});\n\npm.test(\"Devuelve un mensaje de error en JSON\", function () {\n    pm.expect(pm.response.json()).to.have.property(\"error\");\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ciudades/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ciudades",
+                "abc"
+              ]
+            },
+            "description": "El middleware validarId rechaza el id antes de llegar al controlador."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Informes (SQL puro)",
+      "item": [
+        {
+          "name": "Informe Ventas por Categoría (todo el historial)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {\n    pm.response.to.have.status(200);\n});\n\npm.test(\"Devuelve totales y el detalle por categoría\", function () {\n    const json = pm.response.json();\n    pm.expect(json).to.have.property(\"total_facturado\");\n    pm.expect(json).to.have.property(\"total_unidades\");\n    pm.expect(json.categorias).to.be.an(\"array\");\n});\n\npm.test(\"Los valores numéricos llegan como número (BigInt/Decimal convertidos)\", function () {\n    const json = pm.response.json();\n    pm.expect(json.total_facturado).to.be.a(\"number\");\n    if (json.categorias.length > 0) {\n        pm.expect(json.categorias[0].cantidad_pedidos).to.be.a(\"number\");\n    }\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/informes/ventas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "informes",
+                "ventas"
+              ]
+            },
+            "description": "Informe generado con SQL puro ($queryRaw): JOIN de detalles, productos, categorías y pedidos, con COUNT, SUM y GROUP BY."
+          },
+          "response": []
+        },
+        {
+          "name": "Informe Ventas por Categoría con Rango de Fechas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {\n    pm.response.to.have.status(200);\n});\n\npm.test(\"Respeta el período solicitado\", function () {\n    const periodo = pm.response.json().periodo;\n    pm.expect(periodo.desde).to.eql(\"2026-08-01\");\n    pm.expect(periodo.hasta).to.eql(\"2026-08-31\");\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/informes/ventas?desde=2026-08-01&hasta=2026-08-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "informes",
+                "ventas"
+              ],
+              "query": [
+                {
+                  "key": "desde",
+                  "value": "2026-08-01"
+                },
+                {
+                  "key": "hasta",
+                  "value": "2026-08-31"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Informe en Período Sin Ventas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {\n    pm.response.to.have.status(200);\n});\n\npm.test(\"Devuelve la lista vacía y totales en 0\", function () {\n    const json = pm.response.json();\n    pm.expect(json.categorias).to.have.lengthOf(0);\n    pm.expect(json.total_facturado).to.eql(0);\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/informes/ventas?desde=2030-01-01&hasta=2030-12-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "informes",
+                "ventas"
+              ],
+              "query": [
+                {
+                  "key": "desde",
+                  "value": "2030-01-01"
+                },
+                {
+                  "key": "hasta",
+                  "value": "2030-12-31"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Informe con Fecha en Formato Inválido (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {\n    pm.response.to.have.status(400);\n});\n\npm.test(\"Devuelve un mensaje de error en JSON\", function () {\n    pm.expect(pm.response.json()).to.have.property(\"error\");\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/informes/ventas?desde=hoy",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "informes",
+                "ventas"
+              ],
+              "query": [
+                {
+                  "key": "desde",
+                  "value": "hoy"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Informe con Desde Posterior a Hasta (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {\n    pm.response.to.have.status(400);\n});\n\npm.test(\"Devuelve un mensaje de error en JSON\", function () {\n    pm.expect(pm.response.json()).to.have.property(\"error\");\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/informes/ventas?desde=2026-12-31&hasta=2026-01-01",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "informes",
+                "ventas"
+              ],
+              "query": [
+                {
+                  "key": "desde",
+                  "value": "2026-12-31"
+                },
+                {
+                  "key": "hasta",
+                  "value": "2026-01-01"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Intento de Inyección SQL en el Parámetro (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {\n    pm.response.to.have.status(400);\n});\n\npm.test(\"Devuelve un mensaje de error en JSON\", function () {\n    pm.expect(pm.response.json()).to.have.property(\"error\");\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/informes/ventas?desde=2026-01-01' OR 1=1 --",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "informes",
+                "ventas"
+              ],
+              "query": [
+                {
+                  "key": "desde",
+                  "value": "2026-01-01' OR 1=1 --"
+                }
+              ]
+            },
+            "description": "El valor no cumple el formato AAAA-MM-DD y se rechaza antes de llegar a la base. Aun sin esa validación, $queryRaw envía el valor como parámetro de una consulta preparada."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "Errores generales",
       "item": [
         {
@@ -3336,6 +4025,10 @@
     },
     {
       "key": "idPedido",
+      "value": ""
+    },
+    {
+      "key": "idCiudad",
       "value": ""
     }
   ]

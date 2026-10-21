@@ -1,67 +1,71 @@
-//import db from '../database/conexion.js'
+import { prisma } from "../config/prisma.js";
+import type { Prisma } from "../generated/prisma/client.js";
 
 class EmpleadosModel {
-    async obtenerTodos() { 
-        return await db.query('SELECT * FROM empleados');
-     }
+    async obtenerTodos() {
+        return await prisma.empleados.findMany();
+    }
 
     // Filtrar: empleados de un puesto
-    async obtenerPorPuesto(puesto) {
-        return await db.query('SELECT * FROM empleados WHERE puesto = ?', [puesto]);
+    async obtenerPorPuesto(puesto: string) {
+        return await prisma.empleados.findMany({
+            where: {
+                puesto: {
+                    contains: puesto
+                }
+            }
+        });
     }
 
-    //Cantidad de pedidos y total vendido por empleado
+    //Cantidad de pedidos y total vendido por empleado (JOIN empleados -> pedidos)
     async obtenerEstadisticas() {
-        return await db.query(`
-            SELECT e.id_empleado, e.nombre, e.apellido,
-                   COUNT(p.id_pedido) AS cantidad_pedidos,
-                   COALESCE(SUM(p.total), 0) AS total_vendido
-            FROM empleados e
-            LEFT JOIN pedidos p ON p.id_empleado = e.id_empleado
-            GROUP BY e.id_empleado, e.nombre, e.apellido
-        `);
-    } 
-
-    async crear({ nombre, apellido, fecha_de_nac, fecha_de_ingreso, dni, cuil, email, puesto }) {
-        return await db.query(
-                `INSERT INTO empleados (nombre, apellido, fecha_de_nac, fecha_de_ingreso, dni, cuil, email, puesto) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-                [nombre, apellido, fecha_de_nac, fecha_de_ingreso, dni, cuil, email, puesto]
-            );
-     }
-    async obtenerPorId(id) {
-        return await db.query('SELECT * FROM empleados WHERE id_empleado = ?', [id]);
-   }
-    async actualizar(id, { nombre, apellido, fecha_de_nac, fecha_de_ingreso, dni, cuil, email, puesto }) { 
-        return await db.query(
-                `UPDATE empleados SET nombre = ?, apellido = ?, fecha_de_nac = ?, fecha_de_ingreso = ?, dni = ?, cuil = ?, email = ?, puesto = ? WHERE id_empleado = ?`,
-                [nombre, apellido, fecha_de_nac, fecha_de_ingreso, dni, cuil, email, puesto, id]
-            );
+        return await prisma.empleados.findMany({
+            select: {
+                id_empleado: true,
+                nombre: true,
+                apellido: true,
+                puesto: true,
+                pedidos: {
+                    select: {
+                        total: true
+                    }
+                }
+            }
+        });
     }
-    async eliminar(id) { 
-        return await db.query(
-                'DELETE FROM empleados WHERE id_empleado = ?', 
-                [id]);
-     }
-    async actualizarParcial(id, campos) { 
-        const permitidos = ['nombre', 'apellido', 'fecha_de_nac', 'fecha_de_ingreso', 'dni', 'cuil', 'email', 'puesto'];
-        const keys = Object.keys(campos).filter(key => permitidos.includes(key));
 
-        if (keys.length === 0) {
-            const error = new Error('No se proporcionaron campos válidos para actualizar'); 
-            error.status = 400;
-            throw error;
-        }
+    async crear(datos: Prisma.EmpleadosUncheckedCreateInput) {
+        return await prisma.empleados.create({
+            data: datos
+        });
+    }
 
-        const setClause = keys.map(key => `${key} = ?`).join(', ');
+    async obtenerPorId(id: number) {
+        return await prisma.empleados.findUnique({
+            where: { id_empleado: id }
+        });
+    }
 
-        const values = keys.map(key => campos[key]);
-        values.push(id); 
+    async actualizar(id: number, datos: Prisma.EmpleadosUncheckedUpdateInput) {
+        return await prisma.empleados.update({
+            where: { id_empleado: id },
+            data: datos
+        });
+    }
 
-        return await db.query(
-            `UPDATE empleados SET ${setClause} WHERE id_empleado = ?`, 
-            values
-        );
-     }
+    async eliminar(id: number) {
+        return await prisma.empleados.delete({
+            where: { id_empleado: id }
+        });
+    }
+
+    // Recibe solo los campos permitidos (el filtrado se hace en el controlador)
+    async actualizarParcial(id: number, campos: Prisma.EmpleadosUncheckedUpdateInput) {
+        return await prisma.empleados.update({
+            where: { id_empleado: id },
+            data: campos
+        });
+    }
 }
 
 export default new EmpleadosModel()

@@ -1,85 +1,79 @@
-//import db from '../database/conexion.js'
+import { prisma } from "../config/prisma.js";
+import type { Prisma } from "../generated/prisma/client.js";
 
 class ProductosModel {
-    async obtenerTodos() { 
-        return await db.query(`
-            SELECT pr.*,
-                   c.nombre AS categoria_nombre,
-                   pv.razon_social AS proveedor_razon_social
-            FROM productos pr
-            JOIN categorias c ON pr.id_categoria = c.id_categoria
-            JOIN proveedores pv ON pr.id_proveedor = pv.id_proveedor
-            `);
-     }
+    // Trae los productos con su categoría y proveedor (JOIN)
+    async obtenerTodos() {
+        return await prisma.productos.findMany({
+            include: {
+                categoria: true,
+                proveedor: true
+            }
+        });
+    }
 
-    async crear({ id_categoria, id_proveedor, nombre_producto, descripcion, precio, stock= 0 }) {
-        return await db.query( 
-                `INSERT INTO productos (id_categoria, id_proveedor, nombre_producto, descripcion, precio, stock) VALUES (?, ?, ?, ?, ?, ?)`,
-                [id_categoria, id_proveedor, nombre_producto, descripcion, precio, stock]
-            );
+    async crear(datos: Prisma.ProductosUncheckedCreateInput) {
+        return await prisma.productos.create({
+            data: datos
+        });
     }
 
     // Filtrar productos por categoría
-    async obtenerPorCategoria(idCategoria) {
-        return await db.query('SELECT * FROM productos WHERE id_categoria = ?', [idCategoria]);
+    async obtenerPorCategoria(idCategoria: number) {
+        return await prisma.productos.findMany({
+            where: {
+                id_categoria: idCategoria
+            }
+        });
     }
 
-    // Estadísticas de productos por categoría
+    // Estadísticas de productos por categoría: cantidad, stock total y precio promedio
     async obtenerEstadisticas() {
-        return await db.query(`
-            SELECT c.nombre AS categoria,
-                   COUNT(pr.id_producto) AS cantidad_productos,
-                   ROUND(AVG(pr.precio), 2) AS precio_promedio,
-                   SUM(pr.stock) AS stock_total
-            FROM categorias c
-            LEFT JOIN productos pr ON pr.id_categoria = c.id_categoria
-            GROUP BY c.id_categoria, c.nombre
-        `);
+        return await prisma.productos.groupBy({
+            by: ['id_categoria'],
+            _sum: {
+                stock: true
+            },
+            _avg: {
+                precio: true
+            },
+            _count: {
+                id_producto: true
+            }
+        });
     }
 
-    async obtenerPorId(id) {
-        return await db.query(`
-            SELECT pr.*,
-                   c.nombre AS categoria_nombre,
-                   pv.razon_social AS proveedor_razon_social
-            FROM productos pr
-            JOIN categorias c ON pr.id_categoria = c.id_categoria
-            JOIN proveedores pv ON pr.id_proveedor = pv.id_proveedor
-             WHERE pr.id_producto = ?`, [id]);
+    // Trae el producto con su categoría y proveedor (JOIN)
+    async obtenerPorId(id: number) {
+        return await prisma.productos.findUnique({
+            where: { id_producto: id },
+            include: {
+                categoria: true,
+                proveedor: true
+            }
+        });
     }
 
-   
-    async actualizar(id, { id_categoria, id_proveedor, nombre_producto, descripcion, precio, stock }) { 
-        return await db.query(
-                `UPDATE productos SET id_categoria = ?, id_proveedor = ?, nombre_producto = ?, descripcion = ?, precio = ?, stock = ? WHERE id_producto = ?`,
-                [id_categoria, id_proveedor, nombre_producto, descripcion, precio, stock, id]
-            );
+    async actualizar(id: number, datos: Prisma.ProductosUncheckedUpdateInput) {
+        return await prisma.productos.update({
+            where: { id_producto: id },
+            data: datos
+        });
     }
-    async eliminar(id) { 
-        return await db.query(
-                'DELETE FROM productos WHERE id_producto = ?', 
-                [id]);
-     }
-    async actualizarParcial(id, campos) { 
-        const permitidos = ['id_categoria', 'id_proveedor', 'nombre_producto', 'descripcion', 'precio', 'stock'];
-        const keys = Object.keys(campos).filter(key => permitidos.includes(key));
 
-        if (keys.length === 0) {
-            const error = new Error('No se proporcionaron campos válidos para actualizar'); 
-            error.status = 400;
-            throw error;
-        }
+    async eliminar(id: number) {
+        return await prisma.productos.delete({
+            where: { id_producto: id }
+        });
+    }
 
-        const setClause = keys.map(key => `${key} = ?`).join(', ');
-            
-        const values = keys.map(key => campos[key]);
-        values.push(id); 
-
-        return await db.query(
-            `UPDATE productos SET ${setClause} WHERE id_producto = ?`, 
-            values
-        );
-     }
+    // Recibe solo los campos permitidos (el filtrado se hace en el controlador)
+    async actualizarParcial(id: number, campos: Prisma.ProductosUncheckedUpdateInput) {
+        return await prisma.productos.update({
+            where: { id_producto: id },
+            data: campos
+        });
+    }
 }
 
 export default new ProductosModel()

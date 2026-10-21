@@ -1,5 +1,6 @@
 import express from "express";
 import clientesControllers from "../controllers/clientesControllers.js";
+import validarId from "../middlewares/validarId.js";
 
 
 const router = express.Router();
@@ -17,6 +18,7 @@ router.get('/estadisticas', clientesControllers.estadisticas)
 
 //Métodos con /:id 
 router.route('/:id')
+ .all(validarId) //valida id
  .put(clientesControllers.actualizar)  //Método  PUT
 
 //Método Get id

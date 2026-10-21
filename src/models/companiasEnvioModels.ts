@@ -1,66 +1,73 @@
-//import db from '../database/conexion.js'
+import { prisma } from "../config/prisma.js";
+import type { Prisma } from "../generated/prisma/client.js";
 
 class CompaniasEnvioModel {
-    async obtenerTodos() { 
-        return await db.query('SELECT * FROM compania_envio');
+    async obtenerTodos() {
+        return await prisma.companiaEnvio.findMany();
     }
 
     // Filtrar compañías por nombre
-    async buscarPorNombre(texto) {
-        return await db.query('SELECT * FROM compania_envio WHERE nombre LIKE ?', [`%${texto}%`]);
+    async buscarPorNombre(texto: string) {
+        return await prisma.companiaEnvio.findMany({
+            where: {
+                nombre: {
+                    contains: texto
+                }
+            }
+        });
     }
 
     //Cantidad de envíos por compañía
     async obtenerEstadisticas() {
-        return await db.query(`
-            SELECT ce.id_compania, ce.nombre,
-                   COUNT(p.id_pedido) AS cantidad_envios
-            FROM compania_envio ce
-            LEFT JOIN pedidos p ON p.id_compania = ce.id_compania
-            GROUP BY ce.id_compania, ce.nombre
-        `);
+        return await prisma.companiaEnvio.findMany({
+            select: {
+                id_compania: true,
+                nombre: true,
+                _count: {
+                    select: {
+                        pedidos: true // Cuenta cuántos pedidos fueron enviados por esta compañía
+                    }
+                }
+            }
+        });
     }
 
-    async crear({ nombre, telefono, direccion,id_ciudad }) {
-        return await db.query( 
-                `INSERT INTO compania_envio (nombre, telefono, direccion,id_ciudad) VALUES (?, ?, ?,?)`,
-                [nombre, telefono, direccion,id_ciudad]
-            );
+    async crear(datos: Prisma.CompaniaEnvioUncheckedCreateInput) {
+        return await prisma.companiaEnvio.create({
+            data: datos
+        });
     }
-    async obtenerPorId(id) {
-        return await db.query('SELECT * FROM compania_envio WHERE id_compania = ?', [id]);
-   }
-    async actualizar(id, { nombre, telefono, direccion ,id_ciudad}) { 
-        return await db.query(
-                `UPDATE compania_envio SET nombre = ?, telefono = ?, direccion = ?,id_ciudad=? WHERE id_compania = ?`,
-                [nombre, telefono, direccion,id_ciudad, id]
-            );
+
+    // Trae la compañía junto con los datos de su ciudad (JOIN)
+    async obtenerPorId(id: number) {
+        return await prisma.companiaEnvio.findUnique({
+            where: { id_compania: id },
+            include: {
+                ciudad: true
+            }
+        });
     }
-    async eliminar(id) { 
-        return await db.query(
-                'DELETE FROM compania_envio WHERE id_compania = ?', 
-                [id]);
-     }
-    async actualizarParcial(id, campos) { 
-        const permitidos = ['nombre', 'telefono', 'direccion','id_ciudad'];
-        const keys = Object.keys(campos).filter(key => permitidos.includes(key));
 
-        if (keys.length === 0) {
-            const error = new Error('No se proporcionaron campos válidos para actualizar'); 
-            error.status = 400;
-            throw error;
-        }
+    async actualizar(id: number, datos: Prisma.CompaniaEnvioUncheckedUpdateInput) {
+        return await prisma.companiaEnvio.update({
+            where: { id_compania: id },
+            data: datos
+        });
+    }
 
-        const setClause = keys.map(key => `${key} = ?`).join(', ');
-            
-        const values = keys.map(key => campos[key]);
-        values.push(id); 
+    async eliminar(id: number) {
+        return await prisma.companiaEnvio.delete({
+            where: { id_compania: id }
+        });
+    }
 
-        return await db.query(
-            `UPDATE compania_envio SET ${setClause} WHERE id_compania = ?`, 
-            values
-        );
-     }
+    // Recibe solo los campos permitidos (el filtrado se hace en el controlador)
+    async actualizarParcial(id: number, campos: Prisma.CompaniaEnvioUncheckedUpdateInput) {
+        return await prisma.companiaEnvio.update({
+            where: { id_compania: id },
+            data: campos
+        });
+    }
 }
 
 export default new CompaniasEnvioModel()

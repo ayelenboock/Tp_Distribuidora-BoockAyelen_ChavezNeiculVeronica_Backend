@@ -1,23 +1,40 @@
-const manejoErrores = (err, req, res, next) => {
+import type { Request, Response, NextFunction } from "express";
+import { Prisma } from "../generated/prisma/client.js"
+
+//Modificación del middleware anterior. Recibe los errores que los controladores envían 
+//con next(err) y responde con un código HTTP y un mensaje, lo que evita responder con un 
+//error crudo
+
+const manejoErrores = (err: any, req: Request, res:Response, next: NextFunction) => {
     console.error(err);
 
-    if (err.code === 'ER_DUP_ENTRY') {
-        return res.status(400).json({ error: 'El registro ya existe' });        
+    //errores conocidos de Prisma con código tipo P2xxx
+    if (err instanceof Prisma.PrismaClientKnownRequestError) {
+        switch (err.code) {
+            case 'P2002': //valor duplicado en un campo UNIQUE
+                return res.status(400).json({ error: 'El registro ya existe (valor duplicado)' });
+            case 'P2003': // el registro relacionado a una FK no existe o está en uso
+                return res.status(400).json({ error: 'El registro relacionado no existe o está siendo usado en otra tabla' });
+            case 'P2025': //el registro a eliminar o modificar no existe
+                return res.status(404).json({ error: 'Registro no encontrado. No existe'});
+        }
+    }
+    //Datos con tipo o formato inválido (por ejemplo, un enum que no existe)
+    if (err instanceof Prisma.PrismaClientValidationError) {
+        return res.status(400).json({ error: 'El formato de los datos ingresados es inválido'});
     }
 
-    if (err.code === 'ER_NO_REFERENCED_ROW_2') {
-        return res.status(400).json({ error: 'El registro relacionado no existe' });
+    //JSON malformado en el body
+    if (err.type === 'entity.parse.failed') {
+        return res.status(400).json({ error: 'El cuerpo de la petición no es un JSON válido'});    
     }
 
-    if (err.code === 'ER_ROW_IS_REFERENCED_2') {
-        return res.status(400).json({ error: 'No se puede eliminar el registro porque está siendo usado en otra tabla' });
-    }
-    
+    //errores lanzados a mano con un status
     if (err.status) {
         return res.status(err.status).json({ error: err.message });
     }
 
-    res.status(500).json({ error: 'Error interno del servidor' });
+    return res.status(500).json({ error: 'Error interno del servidor' });
 }
 
 export default manejoErrores;
