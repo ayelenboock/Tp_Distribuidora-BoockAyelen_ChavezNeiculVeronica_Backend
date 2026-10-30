@@ -3,23 +3,24 @@ import type { Prisma } from "../generated/prisma/client.js";
 
 class EmpleadosModel {
     async obtenerTodos() {
-        return await prisma.empleados.findMany();
+        return await prisma.empleado.findMany({ where: { activo: true } });//no lista a los dados de baja
     }
 
-    // Filtrar: empleados de un puesto
+    // Filtrar: empleado de un puesto
     async obtenerPorPuesto(puesto: string) {
-        return await prisma.empleados.findMany({
+        return await prisma.empleado.findMany({
             where: {
                 puesto: {
                     contains: puesto
-                }
+                },
+                activo: true
             }
         });
     }
 
-    //Cantidad de pedidos y total vendido por empleado (JOIN empleados -> pedidos)
+    //Cantidad de pedido y total vendido por empleado (JOIN empleado -> pedido)
     async obtenerEstadisticas() {
-        return await prisma.empleados.findMany({
+        return await prisma.empleado.findMany({
             select: {
                 id_empleado: true,
                 nombre: true,
@@ -34,34 +35,36 @@ class EmpleadosModel {
         });
     }
 
-    async crear(datos: Prisma.EmpleadosUncheckedCreateInput) {
-        return await prisma.empleados.create({
+    async crear(datos: Prisma.EmpleadoUncheckedCreateInput) {
+        return await prisma.empleado.create({
             data: datos
         });
     }
 
     async obtenerPorId(id: number) {
-        return await prisma.empleados.findUnique({
+        return await prisma.empleado.findUnique({
             where: { id_empleado: id }
         });
     }
 
-    async actualizar(id: number, datos: Prisma.EmpleadosUncheckedUpdateInput) {
-        return await prisma.empleados.update({
+    async actualizar(id: number, datos: Prisma.EmpleadoUncheckedUpdateInput) {
+        return await prisma.empleado.update({
             where: { id_empleado: id },
             data: datos
         });
     }
 
+    // "Eliminar" da de baja el empleado, no lo elimina, se conserva el historial de pedidos:
     async eliminar(id: number) {
-        return await prisma.empleados.delete({
-            where: { id_empleado: id }
+        return await prisma.empleado.update({
+            where: { id_empleado: id },
+            data: { activo: false }
         });
     }
 
     // Recibe solo los campos permitidos (el filtrado se hace en el controlador)
-    async actualizarParcial(id: number, campos: Prisma.EmpleadosUncheckedUpdateInput) {
-        return await prisma.empleados.update({
+    async actualizarParcial(id: number, campos: Prisma.EmpleadoUncheckedUpdateInput) {
+        return await prisma.empleado.update({
             where: { id_empleado: id },
             data: campos
         });

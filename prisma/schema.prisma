@@ -17,13 +17,13 @@ datasource db {
 // ENUMS
 // --------------------------------------------------------
 
-enum ClientesCondicionIva {
+enum ClienteCondicionIva {
   Consumidor_Final @map("Consumidor Final")
   Responsable_Inscripto @map("Responsable Inscripto")
   Monotributo
 }
 
-enum PedidosEstado {
+enum PedidoEstado {
   Pendiente
   En_preparacion @map("En preparacion")
   Despachado
@@ -31,7 +31,7 @@ enum PedidosEstado {
   Cancelado
 }
 
-enum ProveedoresCondicionIva {
+enum ProveedorCondicionIva {
   Responsable_Inscripto @map("Responsable Inscripto")
   Monotributo
   Exento
@@ -41,28 +41,31 @@ enum ProveedoresCondicionIva {
 // MODELOS
 // --------------------------------------------------------
 
-model Categorias {
+model Categoria {
   id_categoria   Int         @id @default(autoincrement())
   nombre         String      @unique(map: "nombre") @db.VarChar(50)
   descripcion    String?     @db.Text
   creado_en      DateTime    @default(now()) @db.Timestamp(0)
   actualizado_en DateTime    @default(now()) @updatedAt @db.Timestamp(0)
-  productos      Productos[]
+  productos      Producto[]
 
   @@map("categorias")
 }
 
-model Ciudades {
+model Ciudad {
   id_ciudad      Int             @id @default(autoincrement())
-  nombre         String          @unique(map: "nombre_ciudad_unico") @db.VarChar(100)
-  clientes       Clientes[]
+  nombre         String          @db.VarChar(100)
+  codigo_postal  String          @db.VarChar(8)
+  provincia      String          @db.VarChar(50)
+  clientes       Cliente[]
   compania_envio CompaniaEnvio[]
-  proveedores    Proveedores[]
+  proveedores    Proveedor[]
 
+  @@unique([nombre, provincia], map: "ciudad_provincia_unica")
   @@map("ciudades")
 }
 
-model Clientes {
+model Cliente {
   id_cliente     Int                  @id @default(autoincrement())
   nombre         String?              @db.VarChar(50)
   apellido       String?              @db.VarChar(50)
@@ -73,11 +76,11 @@ model Clientes {
   telefono       String?              @db.VarChar(20)
   email          String?              @unique(map: "email") @db.VarChar(100)
   dni            String?              @unique(map: "dni") @db.VarChar(10)
-  condicion_iva  ClientesCondicionIva @default(Consumidor_Final)
+  condicion_iva  ClienteCondicionIva @default(Consumidor_Final)
   creado_en      DateTime             @default(now()) @db.Timestamp(0)
   actualizado_en DateTime             @default(now()) @updatedAt @db.Timestamp(0)
-  ciudad         Ciudades?            @relation(fields: [id_ciudad], references: [id_ciudad], onDelete: SetNull, onUpdate: Cascade, map: "fk_clientes_ciudades")
-  pedidos        Pedidos[]
+  ciudad         Ciudad?            @relation(fields: [id_ciudad], references: [id_ciudad], onDelete: SetNull, onUpdate: Cascade, map: "fk_clientes_ciudades")
+  pedidos        Pedido[]
 
   @@index([id_ciudad], map: "fk_clientes_ciudades")
   @@map("clientes")
@@ -91,22 +94,22 @@ model CompaniaEnvio {
   id_ciudad      Int?
   creado_en      DateTime  @default(now()) @db.Timestamp(0)
   actualizado_en DateTime  @default(now()) @updatedAt @db.Timestamp(0)
-  ciudad         Ciudades? @relation(fields: [id_ciudad], references: [id_ciudad], onDelete: SetNull, onUpdate: Cascade, map: "fk_compania_envio_ciudades")
-  pedidos        Pedidos[]
+  ciudad         Ciudad? @relation(fields: [id_ciudad], references: [id_ciudad], onDelete: SetNull, onUpdate: Cascade, map: "fk_compania_envio_ciudades")
+  pedidos        Pedido[]
 
   @@index([id_ciudad], map: "fk_compania_envio_ciudades")
   @@map("compania_envio")
 }
 
-model DetallesPedidos {
+model DetallePedido {
   id_pedido      Int
   id_producto    Int
   cantidad       Int
   precio_unitario Decimal  @db.Decimal(10, 2)
   creado_en      DateTime @default(now()) @db.Timestamp(0)
   actualizado_en DateTime @default(now()) @updatedAt @db.Timestamp(0)
-  pedido         Pedidos   @relation(fields: [id_pedido], references: [id_pedido], onDelete: Cascade, onUpdate: Cascade, map: "detalles_pedidos_ibfk_1")
-  producto       Productos @relation(fields: [id_producto], references: [id_producto], onDelete: Restrict, onUpdate: Cascade, map: "detalles_pedidos_ibfk_2")
+  pedido         Pedido   @relation(fields: [id_pedido], references: [id_pedido], onDelete: Cascade, onUpdate: Cascade, map: "detalles_pedidos_ibfk_1")
+  producto       Producto @relation(fields: [id_producto], references: [id_producto], onDelete: Restrict, onUpdate: Cascade, map: "detalles_pedidos_ibfk_2")
 
   @@id([id_pedido, id_producto])
   @@index([id_pedido], map: "id_pedido")
@@ -114,7 +117,7 @@ model DetallesPedidos {
   @@map("detalles_pedidos")
 }
 
-model Empleados {
+model Empleado {
   id_empleado      Int      @id @default(autoincrement())
   nombre           String   @db.VarChar(50)
   apellido         String   @db.VarChar(50)
@@ -124,27 +127,28 @@ model Empleados {
   cuil             String   @unique(map: "cuil") @db.VarChar(11)
   email            String?  @unique(map: "email") @db.VarChar(100)
   puesto           String   @db.VarChar(50)
+  activo           Boolean @default(true)
   creado_en        DateTime @default(now()) @db.Timestamp(0)
   actualizado_en   DateTime @default(now()) @updatedAt @db.Timestamp(0)
-  pedidos          Pedidos[]
+  pedidos          Pedido[]
 
   @@map("empleados")
 }
 
-model Pedidos {
+model Pedido {
   id_pedido      Int               @id @default(autoincrement())
   id_cliente     Int
   id_empleado    Int
   id_compania    Int
   fecha          DateTime          @default(now()) @db.Timestamp(0)
   total          Decimal           @default(0.00) @db.Decimal(10, 2)
-  estado         PedidosEstado     @default(Pendiente)
+  estado         PedidoEstado     @default(Pendiente)
   creado_en      DateTime          @default(now()) @db.Timestamp(0)
   actualizado_en DateTime          @default(now()) @updatedAt @db.Timestamp(0)
-  cliente        Clientes          @relation(fields: [id_cliente], references: [id_cliente], onDelete: Restrict, onUpdate: Cascade, map: "pedidos_ibfk_1")
-  empleado       Empleados         @relation(fields: [id_empleado], references: [id_empleado], onDelete: Restrict, onUpdate: Cascade, map: "pedidos_ibfk_2")
+  cliente        Cliente          @relation(fields: [id_cliente], references: [id_cliente], onDelete: Restrict, onUpdate: Cascade, map: "pedidos_ibfk_1")
+  empleado       Empleado         @relation(fields: [id_empleado], references: [id_empleado], onDelete: Restrict, onUpdate: Cascade, map: "pedidos_ibfk_2")
   compania_envio CompaniaEnvio     @relation(fields: [id_compania], references: [id_compania], onDelete: Restrict, onUpdate: Cascade, map: "pedidos_ibfk_3")
-  detalles       DetallesPedidos[]
+  detalles       DetallePedido[]
 
   @@index([id_cliente], map: "id_cliente")
   @@index([id_empleado], map: "id_empleado")
@@ -152,7 +156,7 @@ model Pedidos {
   @@map("pedidos")
 }
 
-model Productos {
+model Producto {
   id_producto     Int               @id @default(autoincrement())
   id_proveedor    Int
   id_categoria    Int
@@ -162,16 +166,16 @@ model Productos {
   stock           Int               @default(0)
   creado_en       DateTime          @default(now()) @db.Timestamp(0)
   actualizado_en  DateTime          @default(now()) @updatedAt @db.Timestamp(0)
-  categoria       Categorias        @relation(fields: [id_categoria], references: [id_categoria], onDelete: Restrict, onUpdate: Cascade, map: "productos_ibfk_2")
-  proveedor       Proveedores       @relation(fields: [id_proveedor], references: [id_proveedor], onDelete: Restrict, onUpdate: Cascade, map: "productos_ibfk_1")
-  detalles        DetallesPedidos[]
+  categoria       Categoria         @relation(fields: [id_categoria], references: [id_categoria], onDelete: Restrict, onUpdate: Cascade, map: "productos_ibfk_2")
+  proveedor       Proveedor         @relation(fields: [id_proveedor], references: [id_proveedor], onDelete: Restrict, onUpdate: Cascade, map: "productos_ibfk_1")
+  detalles        DetallePedido[]
 
   @@index([id_proveedor], map: "id_proveedor")
   @@index([id_categoria], map: "id_categoria")
   @@map("productos")
 }
 
-model Proveedores {
+model Proveedor {
   id_proveedor    Int                     @id @default(autoincrement())
   razon_social    String                  @unique(map: "razon_social") @db.VarChar(150)
   nombre_contacto String?                 @db.VarChar(100)
@@ -179,11 +183,11 @@ model Proveedores {
   email           String?                 @unique(map: "email") @db.VarChar(100)
   direccion       String?                 @db.VarChar(255)
   id_ciudad       Int?
-  condicion_iva   ProveedoresCondicionIva
+  condicion_iva   ProveedorCondicionIva
   creado_en       DateTime                @default(now()) @db.Timestamp(0)
   actualizado_en  DateTime                @default(now()) @updatedAt @db.Timestamp(0)
-  ciudad          Ciudades?               @relation(fields: [id_ciudad], references: [id_ciudad], onDelete: SetNull, onUpdate: Cascade, map: "fk_proveedores_ciudades")
-  productos       Productos[]
+  ciudad          Ciudad?                 @relation(fields: [id_ciudad], references: [id_ciudad], onDelete: SetNull, onUpdate: Cascade, map: "fk_proveedores_ciudades")
+  productos       Producto[]
 
   @@index([id_ciudad], map: "fk_proveedores_ciudades")
   @@map("proveedores")

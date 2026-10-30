@@ -14,7 +14,10 @@ const manejoErrores = (err: any, req: Request, res:Response, next: NextFunction)
             case 'P2002': //valor duplicado en un campo UNIQUE
                 return res.status(400).json({ error: 'El registro ya existe (valor duplicado)' });
             case 'P2003': // el registro relacionado a una FK no existe o está en uso
-                return res.status(400).json({ error: 'El registro relacionado no existe o está siendo usado en otra tabla' });
+                if (req.method === 'DELETE') {
+                    return res.status(409).json({ error: 'No se puede eliminar: tiene registros asociados (por ejemplo, pedidos)'});
+                }
+                return res.status(400).json({ error: 'El registro relacionado no existe' });
             case 'P2025': //el registro a eliminar o modificar no existe
                 return res.status(404).json({ error: 'Registro no encontrado. No existe'});
         }

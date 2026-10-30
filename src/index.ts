@@ -7,11 +7,13 @@ import morgan from "morgan";
 
 import rutaNoEncontrada from "./middlewares/rutaNoEncontrada.js";
 import manejoErrores from "./middlewares/manejoErrores.js";
+import normalizarEnums from "./middlewares/normalizarEnum.js";
 
 
 const app = express();
 app.use(morgan('dev'));
 app.use(express.json());
+app.use(normalizarEnums);
 app.use(cors());
 app.use(router);
 app.use(rutaNoEncontrada);

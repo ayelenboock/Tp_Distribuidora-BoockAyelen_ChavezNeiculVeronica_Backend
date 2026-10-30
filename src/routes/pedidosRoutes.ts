@@ -9,6 +9,7 @@ const router = express.Router();
 router.get('/', pedidosControllers.consultar)
 //Método POST
 router.post('/', pedidosControllers.ingresar)
+router.post('/:id/detalles', validarId, pedidosControllers.agregarDetalle)
 
 //Métodos GET por estado
 router.get('/estado/:estado', pedidosControllers.consultarPorEstado)

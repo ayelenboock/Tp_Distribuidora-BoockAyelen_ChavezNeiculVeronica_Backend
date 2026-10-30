@@ -180,19 +180,17 @@ class EmpleadosController {
             // Verificamos que el empleado exista antes de intentar borrarlo
             const empleadoExistente = await EmpleadosModel.obtenerPorId(id);
 
-            if (!empleadoExistente) {
+            if (!empleadoExistente || !empleadoExistente.activo) {
                 return res.status(404).json({ error: 'Empleado no encontrado' });
             }
 
             await EmpleadosModel.eliminar(id);
 
-            return res.status(200).json({ mensaje: 'Empleado eliminado con éxito' });
+            return res.status(200).json({ mensaje: 'Empleado dado de baja con éxito' });
 
            }catch(err){
                next(err); // lo maneja el middleware global de errores
            }
     }
-
 }
-
 export default new EmpleadosController();

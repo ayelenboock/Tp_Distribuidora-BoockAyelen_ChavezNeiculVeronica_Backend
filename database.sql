@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 21-10-2026 a las 01:23:45
+-- Tiempo de generación: 30-10-2026 a las 01:54:19
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -20,8 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `distribuidora`
 --
-CREATE DATABASE IF NOT EXISTS `distribuidora` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE `distribuidora`;
 
 -- --------------------------------------------------------
 
@@ -56,18 +54,26 @@ INSERT INTO `categorias` (`id_categoria`, `nombre`, `descripcion`, `creado_en`, 
 
 CREATE TABLE `ciudades` (
   `id_ciudad` int(11) NOT NULL,
-  `nombre` varchar(100) NOT NULL
+  `nombre` varchar(100) NOT NULL,
+  `codigo_postal` varchar(8) NOT NULL,
+  `provincia` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Volcado de datos para la tabla `ciudades`
 --
 
-INSERT INTO `ciudades` (`id_ciudad`, `nombre`) VALUES
-(6, 'Bariloche'),
-(7, 'Cipolletti'),
-(5, 'Viedma'),
-(8, 'Villa Regina');
+INSERT INTO `ciudades` (`id_ciudad`, `nombre`, `codigo_postal`, `provincia`) VALUES
+(5, 'Viedma', '8500', 'Río Negro'),
+(6, 'Bariloche', '8400', 'Río Negro'),
+(7, 'Cipolletti', '8324', 'Río Negro'),
+(8, 'Villa Regina', '8336', 'Río Negro'),
+(11, 'General Roca', '8332', 'Río Negro'),
+(12, 'Neuquén', '8300', 'Neuquén'),
+(13, 'San Martín de los Andes', '8370', 'Neuquén'),
+(14, 'Mendoza', '5500', 'Mendoza'),
+(15, 'San Miguel de Tucumán', '4000', 'Tucumán'),
+(16, 'Ciudad Autónoma de Buenos Aires', '1000', 'CABA');
 
 -- --------------------------------------------------------
 
@@ -96,11 +102,11 @@ CREATE TABLE `clientes` (
 --
 
 INSERT INTO `clientes` (`id_cliente`, `nombre`, `apellido`, `cuit`, `razon_social`, `direccion`, `id_ciudad`, `telefono`, `email`, `dni`, `condicion_iva`, `creado_en`, `actualizado_en`) VALUES
-(5, NULL, NULL, '30712345678', 'Boutique Bella SRL', 'Moreno 340, Bariloche', NULL, '2944456677', 'compras@boutiquebella.com.ar', NULL, 'Responsable Inscripto', '2026-10-20 23:20:24', '2026-10-20 23:20:24'),
-(6, NULL, NULL, '30709876543', 'Tienda Urbana SA', 'Av. Bustillo 5600, Bariloche', NULL, '2944478899', 'proveedores@tiendaurbana.com.ar', NULL, 'Responsable Inscripto', '2026-10-20 23:20:24', '2026-10-20 23:20:24'),
-(7, 'Marcela', 'Quiroga', '27284561239', NULL, 'Elflein 1020, Bariloche', NULL, '2944467788', 'marcela.quiroga@mail.com', '28456123', 'Monotributo', '2026-10-20 23:20:24', '2026-10-20 23:20:24'),
-(8, 'Ramiro', 'Benítez', '20331239874', NULL, 'Onelli 1450, Bariloche', NULL, '2944489900', 'ramiro.benitez@mail.com', '33123987', 'Consumidor Final', '2026-10-20 23:20:24', '2026-10-20 23:20:24'),
-(9, 'Natalia', 'Paz', '27389874561', NULL, 'Gallardo 780, Bariloche', NULL, '2944490011', 'natalia.paz@mail.com', '38987456', 'Monotributo', '2026-10-20 23:20:24', '2026-10-20 23:20:24');
+(5, NULL, NULL, '30712345678', 'Boutique Bella SRL', 'Moreno 340, Bariloche', 6, '2944456677', 'compras@boutiquebella.com.ar', NULL, 'Responsable Inscripto', '2026-10-20 23:20:24', '2026-10-20 23:20:24'),
+(6, NULL, NULL, '30709876543', 'Tienda Urbana SA', 'Av. Bustillo 5600, Bariloche', 6, '2944478899', 'proveedores@tiendaurbana.com.ar', NULL, 'Responsable Inscripto', '2026-10-20 23:20:24', '2026-10-20 23:20:24'),
+(7, 'Marcela', 'Quiroga', '27284561239', NULL, 'Elflein 1020, Bariloche', 6, '2944467788', 'marcela.quiroga@mail.com', '28456123', 'Monotributo', '2026-10-20 23:20:24', '2026-10-20 23:20:24'),
+(8, 'Ramiro', 'Benítez', '20331239874', NULL, 'Onelli 1450, Bariloche', 6, '2944489900', 'ramiro.benitez@mail.com', '33123987', 'Consumidor Final', '2026-10-20 23:20:24', '2026-10-20 23:20:24'),
+(9, 'Natalia', 'Paz', '27389874561', NULL, 'Gallardo 780, Bariloche', 6, '2944490011', 'natalia.paz@mail.com', '38987456', 'Monotributo', '2026-10-20 23:20:24', '2026-10-20 23:20:24');
 
 -- --------------------------------------------------------
 
@@ -123,12 +129,12 @@ CREATE TABLE `compania_envio` (
 --
 
 INSERT INTO `compania_envio` (`id_compania`, `nombre`, `telefono`, `direccion`, `id_ciudad`, `creado_en`, `actualizado_en`) VALUES
-(3, 'ANDREANI', '2984535254', 'Mitre 1211, Gral. Roca', NULL, '2026-10-20 23:20:24', '2026-10-20 23:20:24'),
-(4, 'Transporte Patagonia SRL', '2944435566', 'Av. de los Pioneros 3400, Bariloche', NULL, '2026-10-20 23:20:24', '2026-10-20 23:20:24'),
-(5, 'Correo Express Norte', '3814201133', 'San Juan 720, San Miguel de Tucumán', NULL, '2026-10-20 23:20:24', '2026-10-20 23:20:24'),
-(6, 'Flete Andino', '2614287744', 'Av. San Martín 2100, Mendoza', NULL, '2026-10-20 23:20:24', '2026-10-20 23:20:24'),
-(7, 'Logística Cordillera', '2944441020', 'Av. 12 de Octubre 1650, Bariloche', NULL, '2026-10-20 23:20:24', '2026-10-20 23:20:24'),
-(8, 'Envíos Lagos del Sur', '2972425588', 'Av. San Martín 980, San Martín de los Andes', NULL, '2026-10-20 23:20:24', '2026-10-20 23:20:24');
+(3, 'ANDREANI', '2984535254', 'Mitre 1211, Gral. Roca', 11, '2026-10-20 23:20:24', '2026-10-20 23:20:24'),
+(4, 'Transporte Patagonia SRL', '2944435566', 'Av. de los Pioneros 3400, Bariloche', 6, '2026-10-20 23:20:24', '2026-10-20 23:20:24'),
+(5, 'Correo Express Norte', '3814201133', 'San Juan 720, San Miguel de Tucumán', 15, '2026-10-20 23:20:24', '2026-10-20 23:20:24'),
+(6, 'Flete Andino', '2614287744', 'Av. San Martín 2100, Mendoza', 14, '2026-10-20 23:20:24', '2026-10-20 23:20:24'),
+(7, 'Logística Cordillera', '2944441020', 'Av. 12 de Octubre 1650, Bariloche', 6, '2026-10-20 23:20:24', '2026-10-20 23:20:24'),
+(8, 'Envíos Lagos del Sur', '2972425588', 'Av. San Martín 980, San Martín de los Andes', 13, '2026-10-20 23:20:24', '2026-10-20 23:20:24');
 
 -- --------------------------------------------------------
 
@@ -176,19 +182,20 @@ CREATE TABLE `empleados` (
   `email` varchar(100) DEFAULT NULL,
   `puesto` varchar(50) NOT NULL,
   `creado_en` timestamp NOT NULL DEFAULT current_timestamp(),
-  `actualizado_en` timestamp NOT NULL DEFAULT current_timestamp()
+  `actualizado_en` timestamp NOT NULL DEFAULT current_timestamp(),
+  `activo` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Volcado de datos para la tabla `empleados`
 --
 
-INSERT INTO `empleados` (`id_empleado`, `nombre`, `apellido`, `fecha_de_nac`, `fecha_de_ingreso`, `dni`, `cuil`, `email`, `puesto`, `creado_en`, `actualizado_en`) VALUES
-(5, 'Lucas', 'Martínez', '1990-04-12', '2019-03-01', '35123456', '20351234563', 'lucas.martinez@distribuidora.com', 'Vendedor', '2026-10-20 23:20:24', '2026-10-20 23:20:24'),
-(6, 'Valeria', 'López', '1985-11-23', '2016-08-15', '31987654', '27319876548', 'valeria.lopez@distribuidora.com', 'Administrativa', '2026-10-20 23:20:24', '2026-10-20 23:20:24'),
-(7, 'Federico', 'Sosa', '1993-07-05', '2021-01-10', '37456123', '20374561237', 'federico.sosa@distribuidora.com', 'Encargado de depósito', '2026-10-20 23:20:24', '2026-10-20 23:20:24'),
-(8, 'Julieta', 'Romero', '1998-02-18', '2023-05-02', '40789321', '27407893214', 'julieta.romero@distribuidora.com', 'Repartidora', '2026-10-20 23:20:24', '2026-10-20 23:20:24'),
-(9, 'Pablo', 'Acosta', '1982-09-30', '2014-06-20', '29654987', '20296549871', 'pablo.acosta@distribuidora.com', 'Gerente comercial', '2026-10-20 23:20:24', '2026-10-20 23:20:24');
+INSERT INTO `empleados` (`id_empleado`, `nombre`, `apellido`, `fecha_de_nac`, `fecha_de_ingreso`, `dni`, `cuil`, `email`, `puesto`, `creado_en`, `actualizado_en`, `activo`) VALUES
+(5, 'Lucas', 'Martínez', '1990-04-12', '2019-03-01', '35123456', '20351234563', 'lucas.martinez@distribuidora.com', 'Vendedor', '2026-10-20 23:20:24', '2026-10-20 23:20:24', 1),
+(6, 'Valeria', 'López', '1985-11-23', '2016-08-15', '31987654', '27319876548', 'valeria.lopez@distribuidora.com', 'Administrativa', '2026-10-20 23:20:24', '2026-10-20 23:20:24', 1),
+(7, 'Federico', 'Sosa', '1993-07-05', '2021-01-10', '37456123', '20374561237', 'federico.sosa@distribuidora.com', 'Encargado de depósito', '2026-10-20 23:20:24', '2026-10-20 23:20:24', 1),
+(8, 'Julieta', 'Romero', '1998-02-18', '2023-05-02', '40789321', '27407893214', 'julieta.romero@distribuidora.com', 'Repartidora', '2026-10-20 23:20:24', '2026-10-20 23:20:24', 1),
+(9, 'Pablo', 'Acosta', '1982-09-30', '2014-06-20', '29654987', '20296549871', 'pablo.acosta@distribuidora.com', 'Gerente comercial', '2026-10-20 23:20:24', '2026-10-20 23:20:24', 1);
 
 -- --------------------------------------------------------
 
@@ -272,11 +279,11 @@ CREATE TABLE `proveedores` (
 --
 
 INSERT INTO `proveedores` (`id_proveedor`, `razon_social`, `nombre_contacto`, `telefono`, `email`, `direccion`, `id_ciudad`, `condicion_iva`, `creado_en`, `actualizado_en`) VALUES
-(1, 'Textil Andina SRL', 'Martín Gómez', '1145301122', 'ventas@textilandina.com.ar', 'Av. Avellaneda 2850, CABA', NULL, 'Responsable Inscripto', '2026-10-20 23:20:24', '2026-10-20 23:20:24'),
-(2, 'Confecciones del Plata SA', 'Laura Fernández', '1143205566', 'comercial@confeccionesdelplata.com.ar', 'Gascón 640, CABA', NULL, 'Responsable Inscripto', '2026-10-20 23:20:24', '2026-10-20 23:20:24'),
-(3, 'Hilados Patagonia SRL', 'Diego Ruiz', '2944427788', 'pedidos@hiladospatagonia.com.ar', 'Av. de los Pioneros 4200, Bariloche', NULL, 'Responsable Inscripto', '2026-10-20 23:20:24', '2026-10-20 23:20:24'),
-(4, 'Tejidos Norte SA', 'Carolina Díaz', '3814251199', 'contacto@tejidosnorte.com.ar', 'Av. Mitre 1300, San Miguel de Tucumán', NULL, 'Responsable Inscripto', '2026-10-20 23:20:24', '2026-10-20 23:20:24'),
-(5, 'Taller Costura Fina', 'Sofía Herrera', '2944523344', 'sofia@costurafina.com.ar', 'Mitre 455, Bariloche', NULL, 'Monotributo', '2026-10-20 23:20:24', '2026-10-20 23:20:24');
+(1, 'Textil Andina SRL', 'Martín Gómez', '1145301122', 'ventas@textilandina.com.ar', 'Av. Avellaneda 2850, CABA', 16, 'Responsable Inscripto', '2026-10-20 23:20:24', '2026-10-20 23:20:24'),
+(2, 'Confecciones del Plata SA', 'Laura Fernández', '1143205566', 'comercial@confeccionesdelplata.com.ar', 'Gascón 640, CABA', 16, 'Responsable Inscripto', '2026-10-20 23:20:24', '2026-10-20 23:20:24'),
+(3, 'Hilados Patagonia SRL', 'Diego Ruiz', '2944427788', 'pedidos@hiladospatagonia.com.ar', 'Av. de los Pioneros 4200, Bariloche', 6, 'Responsable Inscripto', '2026-10-20 23:20:24', '2026-10-20 23:20:24'),
+(4, 'Tejidos Norte SA', 'Carolina Díaz', '3814251199', 'contacto@tejidosnorte.com.ar', 'Av. Mitre 1300, San Miguel de Tucumán', 15, 'Responsable Inscripto', '2026-10-20 23:20:24', '2026-10-20 23:20:24'),
+(5, 'Taller Costura Fina', 'Sofía Herrera', '2944523344', 'sofia@costurafina.com.ar', 'Mitre 455, Bariloche', 6, 'Monotributo', '2026-10-20 23:20:24', '2026-10-20 23:20:24');
 
 -- --------------------------------------------------------
 
@@ -300,6 +307,9 @@ CREATE TABLE `_prisma_migrations` (
 --
 
 INSERT INTO `_prisma_migrations` (`id`, `checksum`, `finished_at`, `migration_name`, `logs`, `rolled_back_at`, `started_at`, `applied_steps_count`) VALUES
+('0f7847d3-8bf2-4326-9f80-921089a51318', '7fe1883b156ea38232a0667c48148d9043bd5f4b60a568233605f92aef1c9553', '2026-10-30 00:36:42.831', '20261030003642_cp_y_provincia_requeridos', NULL, NULL, '2026-10-30 00:36:42.801', 1),
+('3035a23b-d016-4d87-ac67-ac23f662cfc0', '4956f2af347feb9c5e138e1835231ab1a08db3410af3ace469f0879f32d5738a', '2026-10-28 23:18:20.454', '20261028231820_localidades_cp_y_empleado_activo', NULL, NULL, '2026-10-28 23:18:20.434', 1),
+('75b4e764-08b7-407c-a7d8-faf27bf5ad7f', 'c8ce888781e43a9e669bcad56693eff31c2817e9281126cd3a05f3c7bb1ea981', '2026-10-28 23:20:35.364', '20261028232035_cp_y_provincia_obligatorios', NULL, NULL, '2026-10-28 23:20:35.357', 1),
 ('93678d0e-fa9f-4c0a-9d08-47095aada7c3', '296b1d9af71d25e6d2dbfa3f2a73d659b83a4416a953faaf222fc0b47a4bca1c', '2026-10-20 23:16:08.252', '20261015194507_create_usuario', NULL, NULL, '2026-10-20 23:16:07.502', 1);
 
 --
@@ -318,7 +328,7 @@ ALTER TABLE `categorias`
 --
 ALTER TABLE `ciudades`
   ADD PRIMARY KEY (`id_ciudad`),
-  ADD UNIQUE KEY `nombre_ciudad_unico` (`nombre`);
+  ADD UNIQUE KEY `ciudad_provincia_unica` (`nombre`,`provincia`);
 
 --
 -- Indices de la tabla `clientes`
@@ -395,13 +405,13 @@ ALTER TABLE `_prisma_migrations`
 -- AUTO_INCREMENT de la tabla `categorias`
 --
 ALTER TABLE `categorias`
-  MODIFY `id_categoria` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id_categoria` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de la tabla `ciudades`
 --
 ALTER TABLE `ciudades`
-  MODIFY `id_ciudad` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id_ciudad` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT de la tabla `clientes`
@@ -431,7 +441,7 @@ ALTER TABLE `pedidos`
 -- AUTO_INCREMENT de la tabla `productos`
 --
 ALTER TABLE `productos`
-  MODIFY `id_producto` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id_producto` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `proveedores`

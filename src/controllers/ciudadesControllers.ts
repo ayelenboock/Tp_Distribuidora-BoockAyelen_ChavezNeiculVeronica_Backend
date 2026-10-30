@@ -50,14 +50,16 @@ async estadisticas(req: Request, res: Response, next: NextFunction) {
 //POST
     async ingresar(req:Request, res:Response, next: NextFunction) {
         try{
-            const {nombre } = req.body;
+            const {nombre, codigo_postal, provincia } = req.body;
 
-            if (!nombre ) {
+            if (!nombre || !codigo_postal || !provincia ) {
                 return res.status(400).json({error: 'faltan campos obligatorios'});
             }
 
             const nuevaCiudad  = await CiudadesModel.crear({
-                nombre:nombre
+                nombre:nombre,
+                codigo_postal : codigo_postal,
+                provincia : provincia
             });
 
              return res.status (201).json({
@@ -89,7 +91,11 @@ async estadisticas(req: Request, res: Response, next: NextFunction) {
     async actualizar(req:Request, res:Response, next: NextFunction) {
         try{
             const  id  =Number(req.params.id);
-            const { nombre} = req.body;
+            const { nombre, codigo_postal, provincia } = req.body;
+
+            if (!nombre || !codigo_postal || !provincia) {
+                return res.status(400).json({ error: 'Faltan campos obligatorios'});
+            }
 
             const ciudadExiste = await CiudadesModel.obtenerPorId(id);
 
@@ -100,7 +106,9 @@ async estadisticas(req: Request, res: Response, next: NextFunction) {
             }
 
             const ciudadActualizada = await CiudadesModel.actualizar(id, {
-                nombre: nombre
+                nombre: nombre,
+                codigo_postal : codigo_postal,
+                provincia : provincia
             });
 
              return res.status(200).json({
@@ -118,7 +126,7 @@ async estadisticas(req: Request, res: Response, next: NextFunction) {
             const id = Number(req.params.id);
 
             // Lista de columnas que se pueden modificar
-            const permitidos = ['nombre'];
+            const permitidos = ['nombre', 'codigo_postal', 'provincia'];
 
             // Nos quedamos solo con los campos permitidos que vinieron en el body
             const campos: Record<string, any> = Object.fromEntries(

@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import ClientesModel from '../models/clientesModels.js'
-import type { ClientesCondicionIva } from '../generated/prisma/enums.js';
-
+import type { ClienteCondicionIva } from '../generated/prisma/enums.js';
+import { normalizarEnum } from '../utils/normalizarEnum.js';
 
 class ClientesController {
     constructor (){}
@@ -28,7 +28,7 @@ async consultarPorCondicion(req: Request, res: Response, next: NextFunction) {
         const { condicion } = req.params;
 
         // Normalizamos el parámetro reemplazando guiones y forzando el tipo del Enum
-        const condicionFormateada = String(condicion).replace('-', '_') as ClientesCondicionIva;
+        const condicionFormateada = normalizarEnum(condicion) as ClienteCondicionIva;
 
         // Consultamos filtrando por la condición de IVA (el model incluye los datos de la ciudad)
         const clientes = await ClientesModel.obtenerPorCondicion(condicionFormateada);
@@ -92,7 +92,7 @@ async consultarPorCondicion(req: Request, res: Response, next: NextFunction) {
             telefono: telefono,
             email: email,
             dni: dni,
-            condicion_iva: condicion_iva as ClientesCondicionIva
+            condicion_iva: condicion_iva as ClienteCondicionIva
         });
 
         // Prisma nos devuelve el objeto creado directamente con su 'id_cliente'
@@ -143,7 +143,7 @@ async consultarPorCondicion(req: Request, res: Response, next: NextFunction) {
                 telefono:telefono,
                 email:email,
                 dni: dni,
-                condicion_iva: condicion_iva as ClientesCondicionIva
+                condicion_iva: condicion_iva as ClienteCondicionIva
             });
 
         // Prisma nos entrega el registro modificado de forma directa

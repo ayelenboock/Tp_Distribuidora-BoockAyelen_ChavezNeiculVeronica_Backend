@@ -1,6 +1,8 @@
 import type { Request, Response, NextFunction } from 'express';
 import ProveedoresModel from '../models/proveedoresModels.js'
-import type { ProveedoresCondicionIva } from '../generated/prisma/enums.js';
+import type { ProveedorCondicionIva } from '../generated/prisma/enums.js';
+import { normalizarEnum } from '../utils/normalizarEnum.js';
+
 class ProveedoresController {
     constructor () { }
 
@@ -24,8 +26,8 @@ class ProveedoresController {
         try {
             const { condicion } = req.params;
 
-            // Reemplazamos guiones por guiones bajos y forzamos el tipo del Enum
-            const condicionFormateada = String(condicion).replace('-', '_') as ProveedoresCondicionIva;
+            // Usamos normalizarEnum para convertir un valor de enum al formato que usa Prisma
+            const condicionFormateada = normalizarEnum (condicion) as ProveedorCondicionIva;
 
             const proveedores = await ProveedoresModel.obtenerPorCondicion(condicionFormateada);
 
@@ -78,7 +80,7 @@ class ProveedoresController {
                 email,
                 direccion,
                 id_ciudad: Number(id_ciudad), // Conversión a número obligatoria
-                condicion_iva: condicion_iva as ProveedoresCondicionIva
+                condicion_iva: condicion_iva as ProveedorCondicionIva
             });
 
             return res.status(201).json({
@@ -124,7 +126,7 @@ class ProveedoresController {
                 email,
                 direccion,
                 id_ciudad: Number(id_ciudad),
-                condicion_iva: condicion_iva as ProveedoresCondicionIva
+                condicion_iva: condicion_iva as ProveedorCondicionIva
             });
 
             return res.status(200).json({
@@ -154,7 +156,7 @@ class ProveedoresController {
 
             // Normalizamos tipos numéricos y enums si vienen en los campos parciales
             if (campos.id_ciudad !== undefined) campos.id_ciudad = Number(campos.id_ciudad);
-            if (campos.condicion_iva !== undefined) campos.condicion_iva = campos.condicion_iva as ProveedoresCondicionIva;
+            if (campos.condicion_iva !== undefined) campos.condicion_iva = campos.condicion_iva as ProveedorCondicionIva;
 
             // Verificamos que el proveedor exista
             const proveedorExistente = await ProveedoresModel.obtenerPorId(id);

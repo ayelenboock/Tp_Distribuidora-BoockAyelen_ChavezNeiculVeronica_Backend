@@ -3,12 +3,12 @@ import type { Prisma } from "../generated/prisma/client.js";
 
 class CiudadesModel {
     async obtenerTodos() {
-        return await prisma.ciudades.findMany();
+        return await prisma.ciudad.findMany();
     }
 
     // Filtrar ciudad por nombre
     async buscarPorNombre(texto: string) {
-        return await prisma.ciudades.findMany({
+        return await prisma.ciudad.findMany({
             where: {
                 nombre: {
                     contains: texto
@@ -19,7 +19,7 @@ class CiudadesModel {
 
     //Cantidad de clientes por ciudad
     async obtenerEstadisticas() {
-        return await prisma.ciudades.findMany({
+        return await prisma.ciudad.findMany({
             select: {
                 id_ciudad: true,
                 nombre: true,
@@ -32,34 +32,34 @@ class CiudadesModel {
         });
     }
 
-    async crear(datos: Prisma.CiudadesUncheckedCreateInput) {
-        return await prisma.ciudades.create({
+    async crear(datos: Prisma.CiudadUncheckedCreateInput) {
+        return await prisma.ciudad.create({
             data: datos
         });
     }
 
     async obtenerPorId(id: number) {
-        return await prisma.ciudades.findUnique({
+        return await prisma.ciudad.findUnique({
             where: { id_ciudad: id }
         });
     }
 
-    async actualizar(id: number, datos: Prisma.CiudadesUncheckedUpdateInput) {
-        return await prisma.ciudades.update({
+    async actualizar(id: number, datos: Prisma.CiudadUncheckedUpdateInput) {
+        return await prisma.ciudad.update({
             where: { id_ciudad: id },
             data: datos
         });
     }
 
     async eliminar(id: number) {
-        return await prisma.ciudades.delete({
+        return await prisma.ciudad.delete({
             where: { id_ciudad: id }
         });
     }
 
     // Recibe solo los campos permitidos (el filtrado se hace en el controlador)
-    async actualizarParcial(id: number, campos: Prisma.CiudadesUncheckedUpdateInput) {
-        return await prisma.ciudades.update({
+    async actualizarParcial(id: number, campos: Prisma.CiudadUncheckedUpdateInput) {
+        return await prisma.ciudad.update({
             where: { id_ciudad: id },
             data: campos
         });

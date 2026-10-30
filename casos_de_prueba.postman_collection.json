@@ -1,10 +1,10 @@
 {
   "info": {
-    "_postman_id": "c70fd1af-b1ba-4842-8eb5-417675db5baf",
+    "_postman_id": "e56766de-7615-4e5d-80ac-0e94de55fc9f",
     "name": "TP5 Distribuidora - Casos de prueba",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "57570309",
-    "_collection_link": "https://go.postman.co/collection/57570309-c70fd1af-b1ba-4842-8eb5-417675db5baf?source=collection_link"
+    "_collection_link": "https://go.postman.co/collection/57570309-e56766de-7615-4e5d-80ac-0e94de55fc9f?source=collection_link"
   },
   "item": [
     {
@@ -33,7 +33,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Laura\",\n  \"apellido\": \"Giménez\",\n  \"cuit\": \"27401112223\",\n  \"razon_social\": \"Laura Giménez\",\n  \"direccion\": \"Quaglia 520, Bariloche\",\n  \"telefono\": \"2944512233\",\n  \"email\": \"laura.gimenez@mail.com\",\n  \"dni\": \"40111222\",\n  \"condicion_iva\": \"Monotributo\"\n}",
+              "raw": "{\n  \"nombre\": \"Laura\",\n  \"apellido\": \"Giménez\",\n  \"cuit\": \"27401112223\",\n  \"razon_social\": \"Laura Giménez\",\n  \"direccion\": \"Quaglia 520, Bariloche\",\n  \"id_ciudad\": 6,\n  \"telefono\": \"2944512233\",\n  \"email\": \"laura.gimenez@mail.com\",\n  \"dni\": \"40111222\",\n  \"condicion_iva\": \"Monotributo\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -206,7 +206,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Laura\",\n  \"apellido\": \"Giménez\",\n  \"cuit\": \"27401112223\",\n  \"razon_social\": \"Laura Giménez Indumentaria\",\n  \"direccion\": \"Quaglia 520, Bariloche\",\n  \"telefono\": \"2944512233\",\n  \"email\": \"laura.gimenez@mail.com\",\n  \"dni\": \"40111222\",\n  \"condicion_iva\": \"Responsable Inscripto\"\n}",
+              "raw": "{\n  \"nombre\": \"Laura\",\n  \"apellido\": \"Giménez\",\n  \"cuit\": \"27401112223\",\n  \"razon_social\": \"Laura Giménez Indumentaria\",\n  \"direccion\": \"Quaglia 520, Bariloche\",\n  \"id_ciudad\": 6,\n  \"telefono\": \"2944512233\",\n  \"email\": \"laura.gimenez@mail.com\",\n  \"dni\": \"40111222\",\n  \"condicion_iva\": \"Responsable Inscripto\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -407,7 +407,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Copia\",\n  \"apellido\": \"Repetida\",\n  \"cuit\": \"30712345678\",\n  \"razon_social\": \"CUIT ya usado por Boutique Bella\",\n  \"direccion\": \"Moreno 100, Bariloche\",\n  \"telefono\": \"2944000000\",\n  \"email\": \"cuit.repetido@mail.com\",\n  \"dni\": \"99888777\",\n  \"condicion_iva\": \"Responsable Inscripto\"\n}",
+              "raw": "{\n  \"nombre\": \"Copia\",\n  \"apellido\": \"Repetida\",\n  \"cuit\": \"30712345678\",\n  \"razon_social\": \"CUIT ya usado por Boutique Bella\",\n  \"direccion\": \"Moreno 100, Bariloche\",\n  \"id_ciudad\": 6,\n  \"telefono\": \"2944000000\",\n  \"email\": \"cuit.repetido@mail.com\",\n  \"dni\": \"99888777\",\n  \"condicion_iva\": \"Responsable_Inscripto\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -430,14 +430,14 @@
           "response": []
         },
         {
-          "name": "Borrar cliente que tiene pedidos",
+          "name": "Borrar cliente que tiene pedidos (409)",
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Responde 400\", function () {\n    pm.response.to.have.status(400);\n});\n\npm.test(\"Devuelve un mensaje de error en JSON\", function () {\n    pm.expect(pm.response.json()).to.have.property(\"error\");\n});"
+                  "pm.test(\"Responde 409\", function () {\n    pm.response.to.have.status(409);\n});\n\npm.test(\"Devuelve un mensaje de error en JSON\", function () {\n    pm.expect(pm.response.json()).to.have.property(\"error\");\n});"
                 ]
               }
             }
@@ -810,14 +810,14 @@
           "response": []
         },
         {
-          "name": "Consultar Empleado Borrado",
+          "name": "Consultar Empleado dado de baja (activo = false)",
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Responde 404\", function () {\n    pm.response.to.have.status(404);\n});\n\npm.test(\"Devuelve un mensaje de error en JSON\", function () {\n    pm.expect(pm.response.json()).to.have.property(\"error\");\n});"
+                  "pm.test(\"Responde 200\", function () {\n    pm.response.to.have.status(200);\n});\n\npm.test(\"El empleado quedó inactivo\", function () {\n    pm.expect(pm.response.json().activo).to.eql(false);\n});"
                 ]
               }
             }
@@ -887,14 +887,14 @@
           "response": []
         },
         {
-          "name": "Borrar Empleado Con Pedidos",
+          "name": "Dar de baja Empleado Con Pedidos (200)",
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Responde 400\", function () {\n    pm.response.to.have.status(400);\n});\n\npm.test(\"Devuelve un mensaje de error en JSON\", function () {\n    pm.expect(pm.response.json()).to.have.property(\"error\");\n});"
+                  "pm.test(\"Responde 200: baja lógica\", function () {\n    pm.response.to.have.status(200);\n});"
                 ]
               }
             }
@@ -1344,14 +1344,14 @@
           "response": []
         },
         {
-          "name": "Borrar Categoría con Productos",
+          "name": "Borrar Categoría con Productos (409)",
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Responde 400\", function () {\n    pm.response.to.have.status(400);\n});\n\npm.test(\"Devuelve un mensaje de error en JSON\", function () {\n    pm.expect(pm.response.json()).to.have.property(\"error\");\n});"
+                  "pm.test(\"Responde 409\", function () {\n    pm.response.to.have.status(409);\n});\n\npm.test(\"Devuelve un mensaje de error en JSON\", function () {\n    pm.expect(pm.response.json()).to.have.property(\"error\");\n});"
                 ]
               }
             }
@@ -1526,7 +1526,7 @@
       ]
     },
     {
-      "name": "4. Proveedores",
+      "name": "Proveedores",
       "item": [
         {
           "name": "Crear proveedor",
@@ -1551,7 +1551,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"razon_social\": \"Textiles del Valle SRL\",\n  \"nombre_contacto\": \"Marcos López\",\n  \"telefono\": \"1149876543\",\n  \"email\": \"ventas@textilesdelvalle.com.ar\",\n  \"direccion\": \"Av. Avellaneda 3100, CABA\",\n  \"condicion_iva\": \"Responsable Inscripto\"\n}",
+              "raw": "{\n  \"razon_social\": \"Textiles del Valle SRL\",\n  \"nombre_contacto\": \"Marcos López\",\n  \"telefono\": \"1149876543\",\n  \"email\": \"ventas@textilesdelvalle.com.ar\",\n  \"direccion\": \"Av. Caseros 1200, Viedma\",\n  \"id_ciudad\": 5,\n  \"condicion_iva\": \"Responsable_Inscripto\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1724,7 +1724,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"razon_social\": \"Textiles del Valle SRL\",\n  \"nombre_contacto\": \"Marcos López\",\n  \"telefono\": \"1149876543\",\n  \"email\": \"comercial@textilesdelvalle.com.ar\",\n  \"direccion\": \"Av. Avellaneda 3100, CABA\",\n  \"condicion_iva\": \"Monotributo\"\n}",
+              "raw": "{\n  \"razon_social\": \"Textiles del Valle SRL\",\n  \"nombre_contacto\": \"Marcos López\",\n  \"telefono\": \"1149876543\",\n  \"email\": \"comercial@textilesdelvalle.com.ar\",\n  \"direccion\": \"Av. Caseros 1200, Viedma\",\n  \"id_ciudad\": 5,\n  \"condicion_iva\": \"Monotributo\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1903,14 +1903,14 @@
           "response": []
         },
         {
-          "name": "Borrar Proveedor con Productos",
+          "name": "Borrar Proveedor con Productos (409)",
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Responde 400\", function () {\n    pm.response.to.have.status(400);\n});\n\npm.test(\"Devuelve un mensaje de error en JSON\", function () {\n    pm.expect(pm.response.json()).to.have.property(\"error\");\n});"
+                  "pm.test(\"Responde 409\", function () {\n    pm.response.to.have.status(409);\n});\n\npm.test(\"Devuelve un mensaje de error en JSON\", function () {\n    pm.expect(pm.response.json()).to.have.property(\"error\");\n});"
                 ]
               }
             }
@@ -2314,14 +2314,14 @@
           "response": []
         },
         {
-          "name": "Borrar producto que figura en un pedido (400)",
+          "name": "Borrar producto que figura en un pedido (409)",
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Responde 400\", function () {\n    pm.response.to.have.status(400);\n});\n\npm.test(\"Devuelve un mensaje de error en JSON\", function () {\n    pm.expect(pm.response.json()).to.have.property(\"error\");\n});"
+                  "pm.test(\"Responde 409\", function () {\n    pm.response.to.have.status(409);\n});\n\npm.test(\"Devuelve un mensaje de error en JSON\", function () {\n    pm.expect(pm.response.json()).to.have.property(\"error\");\n});"
                 ]
               }
             }
@@ -2347,6 +2347,17 @@
         },
         {
           "name": "Crear Producto Sin Campos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {\n    pm.response.to.have.status(400);\n});\n\npm.test(\"Devuelve un mensaje de error en JSON\", function () {\n    pm.expect(pm.response.json()).to.have.property(\"error\");\n});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [],
@@ -2372,18 +2383,7 @@
               ]
             }
           },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Responde 400\", function () {\n    pm.response.to.have.status(400);\n});\n\npm.test(\"Devuelve un mensaje de error en JSON\", function () {\n    pm.expect(pm.response.json()).to.have.property(\"error\");\n});"
-                ]
-              }
-            }
-          ]
+          "response": []
         }
       ]
     },
@@ -2413,7 +2413,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Envíos Express Sur\",\n  \"telefono\": \"2944401234\",\n  \"direccion\": \"Av. Costanera 1050, Bariloche\"\n}",
+              "raw": "{\n  \"nombre\": \"Envíos Express Sur\",\n  \"telefono\": \"2944401234\",\n  \"direccion\": \"Av. Costanera 1050, Bariloche\",\n  \"id_ciudad\": 6\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2586,7 +2586,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Envíos Express Sur SRL\",\n  \"telefono\": \"2944401234\",\n  \"direccion\": \"Av. Costanera 1050, Bariloche\"\n}",
+              "raw": "{\n  \"nombre\": \"Envíos Express Sur SRL\",\n  \"telefono\": \"2944401234\",\n  \"direccion\": \"Av. Costanera 1050, Bariloche\",\n  \"id_ciudad\": 6\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2742,7 +2742,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Flete Andino\",\n  \"telefono\": \"2614287744\",\n  \"direccion\": \"Ya existe una compañía con este nombre\"\n}",
+              "raw": "{\n  \"nombre\": \"Flete Andino\",\n  \"telefono\": \"2614287744\",\n  \"direccion\": \"Ya existe una compañía con este nombre\",\n  \"id_ciudad\": 6\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2765,14 +2765,14 @@
           "response": []
         },
         {
-          "name": "Borrar Compañía con Pedidos",
+          "name": "Borrar Compañía con Pedidos (409)",
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Responde 400\", function () {\n    pm.response.to.have.status(400);\n});\n\npm.test(\"Devuelve un mensaje de error en JSON\", function () {\n    pm.expect(pm.response.json()).to.have.property(\"error\");\n});"
+                  "pm.test(\"Responde 409\", function () {\n    pm.response.to.have.status(409);\n});\n\npm.test(\"Devuelve un mensaje de error en JSON\", function () {\n    pm.expect(pm.response.json()).to.have.property(\"error\");\n});"
                 ]
               }
             }
@@ -2809,7 +2809,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Responde 201\", function () {\n    pm.response.to.have.status(201);\n});\n\n// Guarda el id creado para usarlo en las siguientes consultas de la carpeta\nif (pm.response.code === 201) {\n    pm.collectionVariables.set(\"idPedido\", pm.response.json().id);\n}"
+                  "pm.test(\"Responde 201\", function () {\n    pm.response.to.have.status(201);\n});\n\npm.test(\"El total lo calculó el servidor\", function () {\n    pm.expect(Number(pm.response.json().pedido.total)).to.eql(2 * 18500 + 24900);\n});\n\n// Guarda el id creado para usarlo en las siguientes consultas de la carpeta\nif (pm.response.code === 201) {\n    pm.collectionVariables.set(\"idPedido\", pm.response.json().pedido.id_pedido);\n}"
                 ]
               }
             }
@@ -2824,7 +2824,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"id_cliente\": 5,\n  \"id_empleado\": 5,\n  \"id_compania\": 4,\n  \"total\": 0,\n  \"estado\": \"Pendiente\"\n}",
+              "raw": "{\n  \"id_cliente\": 5,\n  \"id_empleado\": 9,\n  \"id_compania\": 4,\n  \"detalles\": [\n    {\n      \"id_producto\": 1,\n      \"cantidad\": 2\n    },\n    {\n      \"id_producto\": 2,\n      \"cantidad\": 1\n    }\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2841,6 +2841,94 @@
               "path": [
                 "api",
                 "pedidos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Agregar producto a un pedido (201)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () {\n    pm.response.to.have.status(201);\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_producto\": 5,\n  \"cantidad\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pedidos/{{idPedido}}/detalles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pedidos",
+                "{{idPedido}}",
+                "detalles"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Agregar producto repetido al pedido (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {\n    pm.response.to.have.status(400);\n});\n\npm.test(\"Devuelve un mensaje de error en JSON\", function () {\n    pm.expect(pm.response.json()).to.have.property(\"error\");\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_producto\": 5,\n  \"cantidad\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pedidos/{{idPedido}}/detalles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pedidos",
+                "{{idPedido}}",
+                "detalles"
               ]
             }
           },
@@ -2997,7 +3085,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"id_cliente\": 5,\n  \"id_empleado\": 5,\n  \"id_compania\": 4,\n  \"total\": 0,\n  \"estado\": \"En preparacion\"\n}",
+              "raw": "{\n  \"id_cliente\": 5,\n  \"id_empleado\": 9,\n  \"id_compania\": 4,\n  \"estado\": \"En_preparacion\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3198,7 +3286,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"id_cliente\": 9999,\n  \"id_empleado\": 5,\n  \"id_compania\": 4,\n  \"total\": 0,\n  \"estado\": \"Pendiente\"\n}",
+              "raw": "{\n  \"id_cliente\": 9999,\n  \"id_empleado\": 9,\n  \"id_compania\": 4,\n  \"detalles\": [\n    {\n      \"id_producto\": 1,\n      \"cantidad\": 1\n    }\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3215,6 +3303,335 @@
               "path": [
                 "api",
                 "pedidos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Agregar producto a pedido Entregado (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {\n    pm.response.to.have.status(400);\n});\n\npm.test(\"Devuelve un mensaje de error en JSON\", function () {\n    pm.expect(pm.response.json()).to.have.property(\"error\");\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_producto\": 5,\n  \"cantidad\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pedidos/1/detalles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pedidos",
+                "1",
+                "detalles"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Consultar stock antes (producto 1)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {\n    pm.response.to.have.status(200);\n});\n\npm.collectionVariables.set(\"stockAntes\", pm.response.json().stock);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/productos/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "productos",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear pedido sin stock suficiente (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {\n    pm.response.to.have.status(400);\n});\n\npm.test(\"Devuelve un mensaje de error en JSON\", function () {\n    pm.expect(pm.response.json()).to.have.property(\"error\");\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_cliente\": 5,\n  \"id_empleado\": 9,\n  \"id_compania\": 4,\n  \"detalles\": [\n    {\n      \"id_producto\": 1,\n      \"cantidad\": 2\n    },\n    {\n      \"id_producto\": 4,\n      \"cantidad\": 1\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pedidos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pedidos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verificar que el stock no cambió (transacción)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"La transacción no descontó stock\", function () {\n    pm.expect(pm.response.json().stock).to.eql(Number(pm.collectionVariables.get(\"stockAntes\")));\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/productos/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "productos",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear pedido sin detalles (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {\n    pm.response.to.have.status(400);\n});\n\npm.test(\"Devuelve un mensaje de error en JSON\", function () {\n    pm.expect(pm.response.json()).to.have.property(\"error\");\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_cliente\": 5,\n  \"id_empleado\": 9,\n  \"id_compania\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pedidos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pedidos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear pedido con productos repetidos (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {\n    pm.response.to.have.status(400);\n});\n\npm.test(\"Devuelve un mensaje de error en JSON\", function () {\n    pm.expect(pm.response.json()).to.have.property(\"error\");\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_cliente\": 5,\n  \"id_empleado\": 9,\n  \"id_compania\": 4,\n  \"detalles\": [\n    {\n      \"id_producto\": 1,\n      \"cantidad\": 1\n    },\n    {\n      \"id_producto\": 1,\n      \"cantidad\": 2\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pedidos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pedidos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear pedido con empleado dado de baja (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () {\n    pm.response.to.have.status(400);\n});\n\npm.test(\"Devuelve un mensaje de error en JSON\", function () {\n    pm.expect(pm.response.json()).to.have.property(\"error\");\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_cliente\": 5,\n  \"id_empleado\": 5,\n  \"id_compania\": 4,\n  \"detalles\": [\n    {\n      \"id_producto\": 1,\n      \"cantidad\": 1\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pedidos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pedidos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Pedidos del empleado dado de baja siguen existiendo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"El pedido sigue y conserva su vendedor\", function () {\n    pm.response.to.have.status(200);\n    pm.expect(pm.response.json().id_empleado).to.eql(5);\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pedidos/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pedidos",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Filtrar Pedidos En preparación",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () {\n    pm.response.to.have.status(200);\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pedidos/estado/En_preparacion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pedidos",
+                "estado",
+                "En_preparacion"
               ]
             }
           },
@@ -3248,7 +3665,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombre\": \"General Roca\"\n}",
+              "raw": "{\n  \"nombre\": \"Allen\",\n  \"codigo_postal\": \"8328\",\n  \"provincia\": \"Río Negro\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3406,7 +3823,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombre\": \"General Roca (RN)\"\n}",
+              "raw": "{\n  \"nombre\": \"Allen (RN)\",\n  \"codigo_postal\": \"8328\",\n  \"provincia\": \"Río Negro\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3449,7 +3866,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Gral. Roca\"\n}",
+              "raw": "{\n  \"codigo_postal\": \"R8328\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3636,7 +4053,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Viedma\"\n}",
+              "raw": "{\n  \"nombre\": \"Viedma\",\n  \"codigo_postal\": \"8500\",\n  \"provincia\": \"Río Negro\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -4029,6 +4446,10 @@
     },
     {
       "key": "idCiudad",
+      "value": ""
+    },
+    {
+      "key": "stockAntes",
       "value": ""
     }
   ]
